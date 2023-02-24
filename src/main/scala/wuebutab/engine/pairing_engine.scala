@@ -82,7 +82,7 @@ def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights): Vector[Pa
     .getEdges
     .asScala
     .map(
-      edge => Pairing(
+      edge => Pairing.init(
         teams(graph.getEdgeSource(edge)), 
         teams(graph.getEdgeTarget(edge)), 
         dt, 
