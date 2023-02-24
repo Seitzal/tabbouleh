@@ -36,13 +36,13 @@ object View:
     def prompt = "global"
     def parent = this // This is the uppermost view
     def show(using context: Context) =
-      context.tab.printSummary
+      ???
     def add(data: Array[String])(using context: Context) : Result =
       Result().fail(s"Global view does not support command 'add'")
 
   object Teams extends View:
     def prompt = "teams"
     def parent = Global
-    def show(using context: Context) = context.tab.printTeams
+    def show(using context: Context) = ???
     def add(data: Array[String])(using context: Context): Result =
-      data.seqAction(Tab.addTeam)
+      data.seqAction(???)
