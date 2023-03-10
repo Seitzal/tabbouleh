@@ -22,7 +22,6 @@ object Panel:
     def fields = Seq(
       TableField("Div", _.pairing.division, false),
       TableField("MRS", _.pairing.mean_rank_score.dpl(6), false),
-      TableField("Weight", _.pairing.weight.dpl(6), true),
       TableField("Prop", _.pairing.prop.name, false),
       TableField("Opp", _.pairing.opp.name, false),
       TableField("Chair", _.chair.name, false),

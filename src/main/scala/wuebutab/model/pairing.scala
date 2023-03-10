@@ -36,6 +36,7 @@ object Pairing:
   given t: Tabulatable[Pairing] = new Tabulatable:
 
     def fields = Seq(
+      TableField("Div", _.division, false),
       TableField("MRS", _.mean_rank_score.dpl(6), true),
       TableField("Weight", _.weight.dpl(6), true),
       TableField("Prop", _.prop.name, false),

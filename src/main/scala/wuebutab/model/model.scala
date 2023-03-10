@@ -11,8 +11,8 @@ enum Side(val symbol: String):
   case Opposition extends Side("O")
 
 enum DebateType(val symbol: String):
-  case Impromptu extends DebateType("Impr")
-  case Prepared extends DebateType("Prep")
+  case Impromptu extends DebateType("i")
+  case Prepared extends DebateType("p")
 
 case class SidePref(
   overall: Int = 0,

@@ -62,6 +62,14 @@ object Weights:
   /** Power pairing with exponential scaling for wins, linear scaling for ballots and points, and a scalable random factor */
   def HYBRID_WINEXP(random: Double = 1E-2) = Weights(1E+9, 1E+6, 0, 1E+3, 1E+1, true, 1E+0, 1E-4, random)
 
+  def apply(s: String, r: Double): Weights = s match
+    case "random" => RANDOM
+    case "power" => POWER
+    case "power_winexp" => POWER_WINEXP
+    case "hybrid" => HYBRID(r)
+    case "hybrid_winexp" => HYBRID_WINEXP(r)
+    case invalid => throw Error("Invalid weights setting: " + invalid)
+
 def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights): Vector[Pairing] =
   // Initiate graph
   val graph = SimpleWeightedGraph[Int, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
