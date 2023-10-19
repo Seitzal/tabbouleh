@@ -4,7 +4,6 @@ import scala.util.Random
 import monocle._
 import monocle.syntax.all._
 import cats.implicits._
-import simulacrum.op
 
 enum Side(val symbol: String):
   case Proposition extends Side("P")

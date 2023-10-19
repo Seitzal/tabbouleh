@@ -8,7 +8,7 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
   version("Wuebutab 0.1 DEV, (c) 2023 Alex Seitz / Debating Society Germany e.V.\n")
 
-  banner("Usage: wbt [pair|alloc] [OPTION]...\n\nOptions:\n")
+  banner("Usage: wbt [remote|pair|alloc] [OPTION]...\n\nOptions:\n")
 
   object pair extends Subcommand("pair", "p"):
 
@@ -56,8 +56,13 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
     validateFileExists(judges_path)
     validateFileExists(pairings_path)
 
+  object remote extends Subcommand("remote", "r"):
+    val spreadsheet_id = trailArg[String]()
+
+  addSubcommand(remote)
   addSubcommand(pair)
   addSubcommand(alloc)
+
   verify()
   
   this.subcommand match
@@ -83,6 +88,22 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       write_csv(panels, this.alloc.out())
       if this.alloc.update() then
         write_csv(judges.map(_.apply_panels(panels)), this.alloc.judges_path())
+
+    case Some(_: this.remote.type) =>
+      val id = this.remote.spreadsheet_id()
+      try
+        val sheet = SpreadsheetHandle(
+          "Wuebutab", 
+          "auth/credentials.json", 
+          "auth/tokens", 
+          id
+          )
+        println(s"Set remote to spreadsheet '${sheet.getTitle}' (https://docs.google.com/spreadsheets/d/$id)")
+      catch
+        case e =>
+          println("Error changing remote:")
+          e.printStackTrace()
+          println("Please confirm that credentials and spreadsheet ID are correct.")
 
     case _ =>
       this.printHelp()
