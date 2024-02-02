@@ -12,6 +12,7 @@ import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.services.sheets.v4.Sheets
+import scala.util.Try
 
 class SpreadsheetHandle(
   val applicationName: String,
@@ -69,3 +70,14 @@ class SpreadsheetHandle(
         .toVector
         .map(_
           .toString))
+
+object SpreadsheetHandle:
+
+  def apply(id: String): Try[SpreadsheetHandle] =
+    Try {
+      new SpreadsheetHandle(
+        "Wuebutab", 
+        "auth/credentials.json", 
+        "auth/tokens", 
+        id)
+    }

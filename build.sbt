@@ -12,7 +12,7 @@ lazy val wuebutab = (project in file("."))
       "dev.optics"              %% "monocle-macro"              % "3.2.0",
       "com.github.tototoshi"    %% "scala-csv"                  % "1.3.10",
       "org.jgrapht"             %  "jgrapht-core"               % "1.5.2",
-      "com.google.api-client"   %  "google-api-client"          % "2.2.0",
+      "com.google.api-client"   %  "google-api-client"          % "2.0.0",
       "com.google.oauth-client" %  "google-oauth-client-jetty"  % "1.34.1",
       "com.google.apis"         %  "google-api-services-sheets" % "v4-rev20230815-2.0.0"
     ),

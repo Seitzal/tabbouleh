@@ -74,4 +74,3 @@ object Ballot:
 
   def checkAll(ballots: Vector[Ballot]): Vector[String] =
     (0 until ballots.length).map(i => ballots(i).check.map(s => s"Ballot #${i + 2}: $s")).toVector.flatten
-

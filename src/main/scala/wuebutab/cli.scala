@@ -2,13 +2,17 @@ package wuebutab
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions._
-import java.io.File
+import java.io.{File, PrintWriter}
+import scala.io.Source
+import scala.util.{Try, Success, Failure}
 
 class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
   version("Wuebutab 0.1 DEV, (c) 2023 Alex Seitz / Debating Society Germany e.V.\n")
 
-  banner("Usage: wbt [remote|pair|alloc] [OPTION]...\n\nOptions:\n")
+  banner("Usage: wbt [remote|fetch|pair|alloc] [OPTION]...\n\nOptions:\n")
+
+  object fetch extends Subcommand("fetch", "f")
 
   object pair extends Subcommand("pair", "p"):
 
@@ -62,6 +66,7 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
   addSubcommand(remote)
   addSubcommand(pair)
   addSubcommand(alloc)
+  addSubcommand(fetch)
 
   verify()
   
@@ -91,21 +96,35 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
     case Some(_: this.remote.type) =>
       val id = this.remote.spreadsheet_id()
-      try
-        val sheet = SpreadsheetHandle(
-          "Wuebutab", 
-          "auth/credentials.json", 
-          "auth/tokens", 
-          id
-          )
-        println(s"Set remote to spreadsheet '${sheet.getTitle}' (https://docs.google.com/spreadsheets/d/$id)")
-      catch
-        case e =>
+      SpreadsheetHandle(id) match
+        case Success(sheet) => 
+          val pw = PrintWriter("remote")
+          pw.write(id)
+          pw.close()
+          println(s"Set remote to spreadsheet '${sheet.getTitle}' (https://docs.google.com/spreadsheets/d/$id)")
+        case Failure(e) =>
           println("Error changing remote:")
           e.printStackTrace()
           println("Please confirm that credentials and spreadsheet ID are correct.")
 
+    case Some(_: this.fetch.type) => withRemote(sheet =>
+      val ballots = Ballot.fetchAll(sheet, "Formularantworten 1")
+      val rounds = Round.fetchAll(sheet, "Structure")
+      val problems = Ballot.checkAll(ballots)
+      println(s"${ballots.length} ballots checked, ${problems.length} problems found:")
+      problems.foreach(println)
+      println(Results(ballots, rounds))
+    )
+      
     case _ =>
       this.printHelp()
+
+  def withRemote(f: SpreadsheetHandle => Unit) = 
+    SpreadsheetHandle(Source.fromFile("remote").mkString) match
+      case Success(sheet) => f(sheet)
+      case Failure(e) => 
+        println("Error accessing remote:")
+        e.printStackTrace()
+        println("Please confirm that credentials and spreadsheet ID are correct.")
 
 @main def main(args: String*): Unit = new CLI(args)
