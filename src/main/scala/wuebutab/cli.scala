@@ -114,6 +114,8 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       println(s"${ballots.length} ballots checked, ${problems.length} problems found:")
       problems.foreach(println)
       println(Results(ballots, rounds))
+      println("Team Meta:")
+      println(TeamMeta.fetchAll(sheet))
     )
       
     case _ =>

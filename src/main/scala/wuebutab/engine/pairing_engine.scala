@@ -70,7 +70,8 @@ object Weights:
     case "hybrid_winexp" => HYBRID_WINEXP(r)
     case invalid => throw Error("Invalid weights setting: " + invalid)
 
-def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights): Vector[Pairing] =
+def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights, 
+  sides: Option[Map[String, String]] = None): Vector[Pairing] =
   // Initiate graph
   val graph = SimpleWeightedGraph[Int, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
   // Add vertices for teams
@@ -81,6 +82,7 @@ def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights): Vector[Pa
     t2 <- 0 until teams.length
     if t1 != t2 
     && teams(t1).division == teams(t2).division
+    && sides.map(m => m(teams(t1).name) != m(teams(t2).name)).getOrElse(true)
   do
     graph.addEdge(t1, t2)
     graph.setEdgeWeight(t1, t2, weights(teams(t1), teams(t2), dt))

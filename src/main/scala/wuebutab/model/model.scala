@@ -9,6 +9,10 @@ enum Side(val symbol: String):
   case Proposition extends Side("P")
   case Opposition extends Side("O")
 
+object Side:
+  def fromSymbol(symbol: String) =
+    if symbol.equalsIgnoreCase("P") then Proposition else Opposition
+
 enum DebateType(val symbol: String):
   case Impromptu extends DebateType("i")
   case Prepared extends DebateType("p")

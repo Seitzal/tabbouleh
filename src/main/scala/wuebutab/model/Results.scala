@@ -4,13 +4,14 @@ case class TeamResults(
   team: String,
   wins: Int,
   ballots: Int,
-  points: Double):
+  points: Double,
+  side_pref: SidePref):
 
   def rank_score: Double = wins + ballots * 1E-2 + points * 1E-6
 
 object TeamResults:
 
-  def apply(team: String, debateResults: Vector[DebateResults]) =
+  def apply(team: String, debateResults: Vector[DebateResults], rounds: Vector[Round]) =
 
     val regularWins = debateResults.filter(_.winner == team).length
     val regularBallots = debateResults.map(_.ballots(team)).sum
@@ -26,15 +27,28 @@ object TeamResults:
     val imputedBallots = mixedBallots + naSwingNBallots
     val imputedPoints = (mixedN + naSwingN) * (regularPoints / regularN)
 
+    val prepRounds = rounds.filter(_.debateType == DebateType.Prepared).map(_.roundNo)
+    val imprRounds = rounds.filter(_.debateType == DebateType.Impromptu).map(_.roundNo)
+    val propImprN = debateResults.filter(_.prop == team).map(_.round).filter(imprRounds.contains).length
+    val oppImprN = debateResults.filter(_.opp == team).map(_.round).filter(imprRounds.contains).length
+    val propPrepN = debateResults.filter(_.prop == team).map(_.round).filter(prepRounds.contains).length
+    val oppPrepN = debateResults.filter(_.opp == team).map(_.round).filter(prepRounds.contains).length
+
+    val sidePref = SidePref(
+      2 * (propPrepN + propImprN) - 2 * (oppPrepN + oppImprN),
+      2 * propPrepN - 2 * oppPrepN,
+      2 * propImprN - 2 * oppImprN)
+
     new TeamResults(
       team,
       regularWins + imputedWins,
       regularBallots + imputedBallots,
-      regularPoints + imputedPoints)
+      regularPoints + imputedPoints,
+      sidePref)
   
-  def getAll(debateResults: Vector[DebateResults]) =
+  def getAll(debateResults: Vector[DebateResults], rounds: Vector[Round]) =
     for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser)).distinct 
-    yield TeamResults(team, debateResults) 
+    yield TeamResults(team, debateResults, rounds) 
 
   given t: Tabulatable[TeamResults] = new Tabulatable:
 
@@ -42,16 +56,22 @@ object TeamResults:
       TableField("Team", _.team, false),
       TableField("Wins", _.wins.toString, true),
       TableField("Ballots", _.ballots.toString, true),
-      TableField("Points", _.points.dpl(2), true))
+      TableField("Points", _.points.dpl(2), true),
+      TableField("SP", _.side_pref.overall.toString, true),
+      TableField("P", _.side_pref.prep.toString, true),
+      TableField("I", _.side_pref.impr.toString, true))
 
     def to_csv(tr: TeamResults): Map[String, String] = Map(
       "Team" -> tr.team,
       "Wins" -> tr.wins.toString,
       "Ballots" -> tr.ballots.toString,
-      "Points" -> tr.points.toString)
+      "Points" -> tr.points.toString,
+      "SidePref" -> tr.side_pref.overall.toString,
+      "SidePrefPrep" -> tr.side_pref.prep.toString,
+      "SidePrefImpr" -> tr.side_pref.impr.toString)
 
     def order_csv(keys: Set[String]): Seq[String] =
-      Vector("Team", "Wins", "Ballots", "Points")
+      Vector("Team", "Wins", "Ballots", "Points", "SidePref", "SidePrefPrep", "SidePrefImpr")
 
 case class DebateResults(
   round: Int,
@@ -149,7 +169,7 @@ class Results(ballots: Vector[Ballot], rounds: Vector[Round]):
     .sortBy(_.round)
 
   val teamResults = 
-    TeamResults.getAll(debateResults)
+    TeamResults.getAll(debateResults, rounds)
     .sortBy(_.rank_score)
     .reverse
 
