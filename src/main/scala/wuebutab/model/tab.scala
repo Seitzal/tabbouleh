@@ -8,7 +8,7 @@ case class Tab(
   teams: Vector[Team] = Vector(),
   judges: Vector[Judge] = Vector()):
   def active_teams = teams.filter(_.active)
-  def apply_pairings(pairings: Seq[Pairing]): Tab =
-    this.focus(_.teams).modify(_.map(_.apply_pairings(pairings)))
+  def apply_pairings(pairings: Seq[Pairing], round: Int): Tab =
+    this.focus(_.teams).modify(_.map(_.apply_pairings(pairings, round)))
   def apply_panels(panels: Seq[Panel]): Tab =
     this.focus(_.judges).modify(_.map(_.apply_panels(panels)))

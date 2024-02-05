@@ -40,10 +40,10 @@ case class Weights(
     math.abs(t1.points - t2.points) * points
   def apply_random = 
     Random.nextDouble * random
-  def apply(t1: Team, t2: Team, dt: DebateType): Double =
+  def apply(t1: Team, t2: Team, dt: DebateType, sidelock: Boolean): Double =
     apply_rematch(t1, t2) +
-    apply_side_pref(t1, t2, dt) +
-    apply_side_nofix(t1, t2, dt) +
+    (if sidelock then 0 else apply_side_pref(t1, t2, dt)) +
+    (if sidelock then 0 else apply_side_nofix(t1, t2, dt)) +
     apply_repeat_pullup(t1, t2) +
     apply_wins(t1, t2) +
     apply_ballots(t1, t2) +
@@ -70,8 +70,7 @@ object Weights:
     case "hybrid_winexp" => HYBRID_WINEXP(r)
     case invalid => throw Error("Invalid weights setting: " + invalid)
 
-def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights, 
-  sides: Option[Map[String, String]] = None): Vector[Pairing] =
+def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights, round: Int): Vector[Pairing] =
   // Initiate graph
   val graph = SimpleWeightedGraph[Int, DefaultWeightedEdge](classOf[DefaultWeightedEdge])
   // Add vertices for teams
@@ -82,10 +81,13 @@ def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights,
     t2 <- 0 until teams.length
     if t1 != t2 
     && teams(t1).division == teams(t2).division
-    && sides.map(m => m(teams(t1).name) != m(teams(t2).name)).getOrElse(true)
+    && (
+      !teams(t1).sidelock.isDefinedAt(round) ||
+      teams(t1).sidelock.get(round) != teams(t2).sidelock.get(round))
   do
     graph.addEdge(t1, t2)
-    graph.setEdgeWeight(t1, t2, weights(teams(t1), teams(t2), dt))
+    graph.setEdgeWeight(t1, t2, weights(teams(t1), teams(t2), dt, 
+      teams(t1).sidelock.isDefinedAt(round) || teams(t2).sidelock.isDefinedAt(round)))
   // Compute minimum-weight perfect matching, if possible
   KolmogorovWeightedPerfectMatching(graph)
     .getMatching
@@ -96,5 +98,6 @@ def make_pairings(teams: Seq[Team], dt: DebateType, weights: Weights,
         teams(graph.getEdgeSource(edge)), 
         teams(graph.getEdgeTarget(edge)), 
         dt, 
-        graph.getEdgeWeight(edge)))
+        graph.getEdgeWeight(edge),
+        round))
     .toVector

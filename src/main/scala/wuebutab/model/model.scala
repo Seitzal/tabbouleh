@@ -27,8 +27,8 @@ case class SidePref(
     else overall
   override def toString(): String = s"$overall $prep $impr"
   def apply_pairing(p: Pairing, s: Side): SidePref = (p.dt, s) match   
-    case (DebateType.Prepared, Side.Proposition) => SidePref(overall + 2, prep + 2, impr)
-    case (DebateType.Prepared, Side.Opposition) => SidePref(overall - 2, prep - 2, impr)
-    case (DebateType.Impromptu, Side.Proposition) => SidePref(overall + 2, prep, impr + 2)
-    case (DebateType.Impromptu, Side.Opposition) => SidePref(overall - 2, prep, impr - 2)
+    case (DebateType.Prepared, Side.Proposition) => SidePref(overall + 1, prep + 1, impr)
+    case (DebateType.Prepared, Side.Opposition) => SidePref(overall - 1, prep - 1, impr)
+    case (DebateType.Impromptu, Side.Proposition) => SidePref(overall + 1, prep, impr + 1)
+    case (DebateType.Impromptu, Side.Opposition) => SidePref(overall - 1, prep, impr - 1)
 

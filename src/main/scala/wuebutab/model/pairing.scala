@@ -14,11 +14,16 @@ case class Pairing(
 
 object Pairing:
 
-  def init(t1: Team, t2: Team, dt: DebateType, weight: Double): Pairing =
-    val prop: Team =
-      if t1.side_pref(dt) == t2.side_pref(dt) && Random.nextBoolean() then t2
-      else if t1.side_pref(dt) > t2.side_pref(dt) then t2
-      else t1
+  def init(t1: Team, t2: Team, dt: DebateType, weight: Double, round: Int): Pairing =
+    val prop = (t1.sidelock.get(round), t2.sidelock.get(round)) match
+      case (Some(Side.Proposition), _) => t1
+      case (Some(Side.Opposition), _) => t2
+      case (None, Some(Side.Proposition)) => t2
+      case (None, Some(Side.Opposition)) => t1
+      case _ =>
+        if t1.side_pref(dt) == t2.side_pref(dt) && Random.nextBoolean() then t2
+        else if t1.side_pref(dt) > t2.side_pref(dt) then t2
+        else t1
     val opp: Team = if prop == t1 then t2 else t1
     Pairing(prop, opp, dt, weight)
 
