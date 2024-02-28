@@ -26,31 +26,29 @@ object Actions:
   
   def checkBallots(): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, "Formularantworten 1")
-    val rounds = Round.fetchAll(remote, "Structure")
+    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val rounds = Round.fetchAll(remote, Config.default.sheetNames.structure)
     val problems = Ballot.checkAll(ballots)
-    val meta = TeamMeta.fetchAll(remote)
+    val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
     println(s"${ballots.length} ballots checked, ${problems.length} problems found:")
     problems.foreach(println)
     println(Results(ballots, rounds, meta))
 
   def generatePairings(rounds: Option[List[Int]], update: Boolean): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, "Formularantworten 1")
+    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
     val problems = Ballot.checkAll(ballots)
     if !problems.isEmpty then
       println("Some ballots are problematic. Please address problems before pairing, or override with '-f'.")
       println(s"${problems.length} problems found:")
       problems.foreach(println)
     else
-      val structure = Round.fetchAll(remote, "Structure")
-      val meta = TeamMeta.fetchAll(remote)
+      val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+      val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
       val results = Results(ballots, structure, meta)
       val teams = results.teams.filter(_.active)
       def iter(rounds_remaining: List[Int], teams: Vector[Team]): Unit =
-        if rounds_remaining.isEmpty then
-          if update then write_csv(teams, File("teams.csv"))
-        else
+        if !rounds_remaining.isEmpty then
           structure.find(_.roundNo == rounds_remaining.head) match
             case Some(round) =>
               val pairings = make_pairings(
@@ -70,6 +68,11 @@ object Actions:
             case None => 
               println(s"Couldn't generate pairings for round ${rounds_remaining.head}: Not found in structure.")
               iter(rounds_remaining.tail, teams)
+        else if update then
+            write_csv(teams, File("teams.csv"))
+            val sheetName = s"Teams (updated)"
+            if !remote.sheetExists(sheetName) then remote.createSheet(sheetName) 
+            remote.writeRange(sheetName, teams.asSeqTable)
       rounds match
         case Some(rs) => iter(rs, teams) 
         case None => iter(List(results.rounds_completed.max + 1), teams)

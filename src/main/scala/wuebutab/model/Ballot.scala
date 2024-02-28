@@ -69,7 +69,7 @@ object Ballot:
     winningSide = row(24)
   )
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String = "Form Responses 1"): Vector[Ballot] =
+  def fetchAll(sheet: SpreadsheetHandle, range: String): Vector[Ballot] =
     sheet.readRange(range).tail.map(Ballot(_))
 
   def checkAll(ballots: Vector[Ballot]): Vector[String] =

@@ -25,7 +25,7 @@ object TeamMeta:
     val nameColumn = table.head.indexOf("Team")
     (for row <- table.tail yield row(nameColumn) -> TeamMeta(table.head.zip(row).toMap)).toMap
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String = "Team Meta") =
+  def fetchAll(sheet: SpreadsheetHandle, range: String) =
     getAll(sheet.readRange(range))
 
 case class Team(

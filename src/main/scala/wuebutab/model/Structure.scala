@@ -9,6 +9,6 @@ object Round:
     if row(2) == "manual" then None else Some(Weights(row(2), row(3).toDouble))
   )
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String = "Structure"): Vector[Round] =
+  def fetchAll(sheet: SpreadsheetHandle, range: String): Vector[Round] =
     sheet.readRange(range).tail.map(Round(_))
 
