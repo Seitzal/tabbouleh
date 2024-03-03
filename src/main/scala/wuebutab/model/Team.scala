@@ -17,16 +17,16 @@ object TeamMeta:
       tableFields.getOrElse("Active", "1") != "0",
       tableFields.getOrElse("pull_ups", "0").toInt,
       tableFields
-        .filter((k, v) => k.startsWith("Side "))
-        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v))
+        .filter((k, v) => k.startsWith("Side ") && Side.fromSymbol(v).isDefined)
+        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v).get)
     )
 
   def getAll(table: Vector[Vector[String]]) =
     val nameColumn = table.head.indexOf("Team")
     (for row <- table.tail yield row(nameColumn) -> TeamMeta(table.head.zip(row).toMap)).toMap
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String) =
-    getAll(sheet.readRange(range))
+  def fetchAll(remote: SpreadsheetHandle, range: String) =
+    if remote.rangeExists(range) then getAll(remote.readRange(range)) else Map()
 
 case class Team(
   name: String,
@@ -99,7 +99,7 @@ object Team:
       regularPoints + imputedPoints,
       sidePref,
       previous_opponents,
-      meta.getOrElse(team, TeamMeta("univ.", false, 0, Map())))
+      meta.getOrElse(team, TeamMeta("univ.", true, 0, Map())))
 
   def apply(kv: Map[String, String]): Team = new Team(
     kv("Name"),
@@ -115,12 +115,21 @@ object Team:
       kv.getOrElse("Division", ""),
       kv.getOrElse("Active", "true").toBoolean,
       kv.getOrElse("Pull-ups", "0").toInt,
-      kv.filter((k, v) => k.startsWith("Side"))
-        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v))))
+      kv.filter((k, v) => k.startsWith("Side") && Side.fromSymbol(v).isDefined)
+        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v).get)))
     
   def getAll(debateResults: Vector[DebateResults], rounds: Vector[Round], meta: Map[String, TeamMeta]) =
-    for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser) ++ meta.keys).distinct 
+    for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser) ++ meta.keys).distinct
     yield Team(team, debateResults, rounds, meta) 
+
+  def updateRemote(remote: SpreadsheetHandle, sheetName: String, teams: Vector[Team]): Unit =
+    if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
+    remote.writeRange(s"$sheetName!B1", teams.asSeqTable)
+    val sidelocked_rounds = teams.map(_.meta.sidelock.keySet).reduce(_.union(_)).toVector.sorted
+    val sidelocks_table = 
+      sidelocked_rounds.map("Side " + _) +:
+      teams.map(team => sidelocked_rounds.map(round => team.meta.sidelock.get(round).map(_.symbol).getOrElse("-")))
+    remote.writeRange(s"$sheetName!K1", sidelocks_table)
 
   given t: Tabulatable[Team] = new Tabulatable:
 
@@ -131,7 +140,9 @@ object Team:
       TableField("Points", _.points.dpl(2), true),
       TableField("SP", _.side_pref.overall.toString, true),
       TableField("P", _.side_pref.prep.toString, true),
-      TableField("I", _.side_pref.impr.toString, true))
+      TableField("I", _.side_pref.impr.toString, true),
+      TableField("Active", t => if t.meta.active then "1" else "0", false),
+      TableField("Division", _.meta.division, false))
 
     def to_csv(tr: Team): Map[String, String] = Map(
       "Team" -> tr.name,

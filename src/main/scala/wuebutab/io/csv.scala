@@ -23,8 +23,9 @@ def read_pairings_csv(file: File, teams: Seq[Team], dt: DebateType): Vector[Pair
 
 def write_csv[T](ts: Seq[T], file: File)(using tb: Tabulatable[T]): Unit =
   val writer = CSVWriter.open(file)
-  val kvs = ts.map(tb.to_csv)
-  val keys = tb.order_csv(kvs.map(_.keySet).reduce(_ union _))
-  writer.writeRow(keys)
-  for row <- kvs do writer.writeRow(keys.map(row.getOrElse(_, "")))
+  if !ts.isEmpty then
+    val kvs = ts.map(tb.to_csv)
+    val keys = tb.order_csv(kvs.map(_.keySet).reduce(_ union _))
+    writer.writeRow(keys)
+    for row <- kvs do writer.writeRow(keys.map(row.getOrElse(_, "")))
   writer.close()

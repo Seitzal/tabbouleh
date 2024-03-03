@@ -46,13 +46,12 @@ object Actions:
       val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
       val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
       val results = Results(ballots, structure, meta)
-      val teams = results.teams.filter(_.active)
       def iter(rounds_remaining: List[Int], teams: Vector[Team]): Unit =
         if !rounds_remaining.isEmpty then
           structure.find(_.roundNo == rounds_remaining.head) match
             case Some(round) =>
               val pairings = make_pairings(
-                teams, 
+                teams.filter(_.active), 
                 round.debateType, 
                 round.pairing.getOrElse(Weights.RANDOM),
                 round.roundNo)
@@ -70,12 +69,10 @@ object Actions:
               iter(rounds_remaining.tail, teams)
         else if update then
             write_csv(teams, File("teams.csv"))
-            val sheetName = s"Teams (updated)"
-            if !remote.sheetExists(sheetName) then remote.createSheet(sheetName) 
-            remote.writeRange(sheetName, teams.asSeqTable)
+            Team.updateRemote(remote, Config.default.sheetNames.teams, teams)
       rounds match
-        case Some(rs) => iter(rs, teams) 
-        case None => iter(List(results.rounds_completed.max + 1), teams)
+        case Some(rs) => iter(rs, results.teams) 
+        case None => iter(List(results.rounds_completed.max + 1), results.teams)
   
   def test(): Unit =
     val remote = getRemote
