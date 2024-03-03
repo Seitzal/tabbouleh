@@ -15,7 +15,7 @@ object TeamMeta:
     new TeamMeta(
       tableFields.getOrElse("Division", "univ."),
       tableFields.getOrElse("Active", "1") != "0",
-      tableFields.getOrElse("pull_ups", "0").toInt,
+      tableFields.getOrElse("Pull-ups", "0").toInt,
       tableFields
         .filter((k, v) => k.startsWith("Side ") && Side.fromSymbol(v).isDefined)
         .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v).get)
@@ -129,7 +129,7 @@ object Team:
     val sidelocks_table = 
       sidelocked_rounds.map("Side " + _) +:
       teams.map(team => sidelocked_rounds.map(round => team.meta.sidelock.get(round).map(_.symbol).getOrElse("-")))
-    remote.writeRange(s"$sheetName!K1", sidelocks_table)
+    remote.writeRange(s"$sheetName!L1", sidelocks_table)
 
   given t: Tabulatable[Team] = new Tabulatable:
 
@@ -141,6 +141,7 @@ object Team:
       TableField("SP", _.side_pref.overall.toString, true),
       TableField("P", _.side_pref.prep.toString, true),
       TableField("I", _.side_pref.impr.toString, true),
+      TableField("Pull-ups", _.meta.pull_ups.toString, true),
       TableField("Active", t => if t.meta.active then "1" else "0", false),
       TableField("Division", _.meta.division, false))
 
