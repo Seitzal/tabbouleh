@@ -27,6 +27,12 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       default = None,
       required = false)
 
+  object speakers extends Subcommand("speakers", "s"):
+
+    val minrounds = opt[Int](
+      descr = "Number of rounds a speaker must have spoken in to be considered for the ranking",
+      default = Some(1))
+
   object alloc extends Subcommand("alloc", "a"):
     val teams_path = opt[File](default = Some(File("teams.csv")))
     val judges_path = opt[File](default = Some(File("judges.csv")))
@@ -41,9 +47,10 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
   object test extends Subcommand("test",  "t")
 
   addSubcommand(remote)
-  addSubcommand(pair)
-  addSubcommand(alloc)
   addSubcommand(fetch)
+  addSubcommand(pair)
+  addSubcommand(speakers)
+  addSubcommand(alloc)
   addSubcommand(test)
 
   verify()
@@ -61,6 +68,10 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       val rounds = this.pair.rounds.get
       val update = this.pair.update()
       Actions.generatePairings(rounds, update)
+
+    case Some(_: this.speakers.type) =>
+      val minrounds = this.speakers.minrounds.get.getOrElse(1)
+      Actions.generateSpeakerRanking(minrounds)
 
     case Some(_: this.alloc.type) =>
       val teams = read_teams_csv(this.alloc.teams_path())

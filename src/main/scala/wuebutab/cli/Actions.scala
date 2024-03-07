@@ -74,7 +74,22 @@ object Actions:
         case Some(rs) => iter(rs, results.teams) 
         case None => iter(List(results.rounds_completed.max + 1), results.teams)
   
-  def test(): Unit =
+  def generateSpeakerRanking(minRounds: Int): Unit =
     val remote = getRemote
-    if !remote.sheetExists("Test Output") then remote.createSheet("Test Output")
-    remote.writeRange("Test Output", List(List("1", "2", "3")))
+    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val names = if remote.sheetExists("Names") then Names.fetch(remote, "Names") else Names.empty
+    val speeches_old = if remote.sheetExists("Speeches") then Some(remote.readRange("Speeches")) else None
+    val speeches = Speech.getAll(ballots, names, speeches_old)
+    if !remote.sheetExists("Speeches") then remote.createSheet("Speeches")
+    remote.writeRange("Speeches", speeches.asSeqTable)
+    val newNames = names.update(speeches)
+    if !remote.sheetExists("Names") then remote.createSheet("Names")
+    remote.writeRange("Names", newNames.asSeqTable)
+    val speakers = Speaker.getAll(newNames, speeches)
+    val ranking = speakers.filter(_.roundsSpoken.length >= minRounds).sortBy(0 - _.average)
+    if !remote.sheetExists("Speaker Ranking") then remote.createSheet("Speaker Ranking")
+    remote.writeRange("Speaker Ranking", Vector("Rank") +: (1 to ranking.length).map(i => Vector(i.toString)))
+    remote.writeRange("Speaker Ranking!B1", ranking.asSeqTable)
+    println(render_table(ranking))
+
+  def test(): Unit = return

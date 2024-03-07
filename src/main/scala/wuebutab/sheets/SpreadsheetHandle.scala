@@ -42,7 +42,7 @@ class SpreadsheetHandle(
   def readRange(range: String): Vector[Vector[String]] =
     val request = service.spreadsheets.values.get(spreadsheetId, range)
     val response = request.execute()
-    response.getValues.asNestedSeq
+    response.getValues.asNestedSeq.map(row => row.map(cellValue => cellValue.trim))
 
   def rangeExists(range: String): Boolean =
     Try(readRange(range)) match
