@@ -92,4 +92,33 @@ object Actions:
     remote.writeRange("Speaker Ranking!B1", ranking.asSeqTable)
     println(render_table(ranking))
 
-  def test(): Unit = return
+  def allocateJudges(round: Int, update: Boolean): Unit =
+    val remote = getRemote
+    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+    val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+    val results = Results(ballots, structure, meta)
+    val draws = Draw.fetchAll(remote)
+    val judges = Judge.fetchAll(remote, "Judges").map(_.updateForRounds(draws.values.toSeq))
+    if !draws.isDefinedAt(round) then throw Error(s"No pairings for round $round found in remote.")
+    else
+      val draw = draws(round)
+      val pairings = for row <- draw.tail yield
+        val prop = results.teams.filter(_.name == row(1)).head
+        val opp = results.teams.filter(_.name == row(2)).head
+        Pairing(prop, opp, DebateType.Impromptu, 0d)
+      val panels = make_panels(pairings, judges.filter(_.active), PanelWeights())
+      println(render_table(panels))
+      if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
+
+  def test(): Unit =
+    allocateJudges(5, true)
+    allocateJudges(6, true)
+    allocateJudges(7, true)
+    allocateJudges(8, true)
+    val remote = getRemote
+    val draws = Draw.fetchAll(remote)
+    val judges = Judge.fetchAll(remote, "Judges").map(_.updateForRounds(draws.values.toSeq))
+    println(render_table(judges))
+    val cp = judges.map(_.colleagues_prev)
+    println(cp.map(p => p.length - p.distinct.length).sum)

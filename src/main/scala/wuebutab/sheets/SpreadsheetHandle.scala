@@ -53,6 +53,11 @@ class SpreadsheetHandle(
           else throw e
         case other => throw(other)
   
+  def sheetNames: Vector[String] =
+    val request = service.spreadsheets.get(spreadsheetId)
+    val response = request.execute()
+    response.getSheets.asScala.toVector.map(_.getProperties.getTitle)
+
   def sheetExists(sheetName: String): Boolean = 
     rangeExists(s"$sheetName!A1")
 

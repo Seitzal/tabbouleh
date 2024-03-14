@@ -30,12 +30,19 @@ extension[T] (ts: Seq[T])
   def multiIndex(is: Seq[Int]): Seq[T] = for i <- is yield ts(i)
 
 extension (t: SeqTable)
+
   def select(cols: Set[String]): SeqTable =
     val is = for i <- 0 until t.head.length if cols.contains(t.head(i)) yield i
     t.map(_.multiIndex(is))
+
   def select(cols: String*): SeqTable = t.select(cols.toSet)
+
   def asJavaNestedList: java.util.List[java.util.List[Object]] =
     t.map(_.toList.asJava).toList.asJava
+
+  def padRight: SeqTable =
+    val maxLength = t.map(_.length).max
+    t.map(row => row ++ (0 until maxLength - row.length).map(_ => ""))
 
 extension(d: Double)
   def dpl(places: Int): String = s"%.${places}f".format(d)

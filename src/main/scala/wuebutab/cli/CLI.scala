@@ -34,15 +34,11 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       default = Some(1))
 
   object alloc extends Subcommand("alloc", "a"):
-    val teams_path = opt[File](default = Some(File("teams.csv")))
-    val judges_path = opt[File](default = Some(File("judges.csv")))
-    val pairings_path = opt[File](default = Some(File("pairings.csv")))
-    val out = opt[File](default = Some(File("panels.csv")))
-    val update = toggle(default = Some(false))
-    val debate_type = choice(Seq("i", "p"), default = Some("i"))
-    validateFileExists(teams_path)
-    validateFileExists(judges_path)
-    validateFileExists(pairings_path)
+    
+    val update = toggle(default = Some(true))
+
+    val round = trailArg[Int](
+      required = true)
 
   object test extends Subcommand("test",  "t")
 
@@ -74,15 +70,9 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       Actions.generateSpeakerRanking(minrounds)
 
     case Some(_: this.alloc.type) =>
-      val teams = read_teams_csv(this.alloc.teams_path())
-      val judges = read_judges_csv(this.alloc.judges_path())
-      val dt = if this.alloc.debate_type() == "i" then DebateType.Impromptu else DebateType.Prepared 
-      val pairings = read_pairings_csv(this.alloc.pairings_path(), teams, dt)
-      val panels = make_panels(pairings, judges, PanelWeights())
-      println(render_table(panels))
-      write_csv(panels, this.alloc.out())
-      if this.alloc.update() then
-        write_csv(judges.map(_.apply_panels(panels)), this.alloc.judges_path())
+      val round = this.alloc.round()
+      val update = this.alloc.update()
+      Actions.allocateJudges(round, update)
 
     case Some(_: this.test.type) =>
       Actions.test()

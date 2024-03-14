@@ -4,7 +4,12 @@ case class Panel(
   pairing: Pairing,
   chair: Judge,
   panelist1: Option[Judge],
-  panelist2: Option[Judge])
+  panelist2: Option[Judge]):
+
+  def toTableRow: Vector[String] = Vector(
+    chair.name, 
+    panelist1.map(_.name).getOrElse(""),
+    panelist2.map(_.name).getOrElse(""))
 
 object Panel:
 
