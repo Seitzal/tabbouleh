@@ -21,7 +21,7 @@ case class PanelWeights(
     - j.penalty(p) * penalty
     + j.rating * (if chair then rating_chair else rating_panelist)
     - (if chair then j.times_chair * rotation_chair else 0)
-    + math.abs(p.mean_rank_score - mmrs) * bubble
+    - math.abs(p.mean_rank_score - mmrs) * bubble
     + (if panel.filter(j.colleagues_prev.contains).isEmpty then new_panel else 0)
     + p.mean_rank_score * top
     + Random.nextDouble() * random

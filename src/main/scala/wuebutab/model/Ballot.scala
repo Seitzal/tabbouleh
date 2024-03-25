@@ -70,7 +70,7 @@ object Ballot:
   )
 
   def fetchAll(sheet: SpreadsheetHandle, range: String): Vector[Ballot] =
-    sheet.readRange(range).tail.map(Ballot(_))
+    sheet.readRange(range).tail.map(Ballot(_)).filter(_.judgeStatus != JudgeStatus.Shadow)
 
   def checkAll(ballots: Vector[Ballot]): Vector[String] =
     (0 until ballots.length).map(i => ballots(i).check.map(s => s"Ballot #${i + 2}: $s")).toVector.flatten

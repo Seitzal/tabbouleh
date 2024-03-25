@@ -61,7 +61,7 @@ object Team:
     rounds: Vector[Round],
     meta: Map[String, TeamMeta]): Team =
 
-    val regularWins = debateResults.filter(_.winner == team).length
+    val regularWins = debateResults.filter(d => d.regularMatchFor(team) && d.winner == team).length
     val regularBallots = debateResults.map(_.ballots(team)).sum
     val regularPoints = debateResults.map(_.points(team)).sum
     val regularN = debateResults.filter(_.regularMatchFor(team)).length
@@ -72,7 +72,7 @@ object Team:
     val imputedWins = mixedN + Math.round((regularWins.toFloat / regularN) * naSwingN)
     val mixedBallots = mixedN * (if regularBallots >= regularN * (3d / 2) then 3 else 2)
     val naSwingNBallots = (regularBallots.toFloat / regularN).toInt
-    val imputedBallots = mixedBallots + naSwingNBallots
+    val imputedBallots = mixedBallots + naSwingNBallots * naSwingN
     val imputedPoints = (mixedN + naSwingN) * (regularPoints / regularN)
 
     val prepRounds = rounds.filter(_.debateType == DebateType.Prepared).map(_.roundNo)
@@ -89,7 +89,7 @@ object Team:
 
     val previous_opponents = (
       debateResults.filter(_.prop == team).map(_.opp) ++
-      debateResults.filter(_.opp == team).map(_.opp)
+      debateResults.filter(_.opp == team).map(_.prop)
     ).distinct
 
     new Team(
