@@ -112,23 +112,7 @@ object Actions:
       if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
 
   def test(): Unit =
-    // val remote = getRemote
-    // val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
-    // val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
-    // val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
-    // val results = Results(ballots, structure, meta)
-    // val teams = results.teams.filter(_.active)
-    // val thg = teams.find(_.name == "Theodor-Heuss-Gymnasium Heilbronn").get
-    // println(thg.previous_opponents)
-    // println(teams.filter(_.division == "A").length)
-    // println(teams.filter(_.division == "B").length)
-    // allocateJudges(5, true)
-    // allocateJudges(6, true)
-    // allocateJudges(7, true)
-    // allocateJudges(8, true)
-    val remote = getRemote
-    val draws = Draw.fetchAll(remote)
-    val judges = Judge.fetchAll(remote, "Judges").map(_.updateForRounds(draws.values.toSeq))
-    println(render_table(judges))
-    val cp = judges.map(_.colleagues_prev)
-    println(cp.map(p => p.length - p.distinct.length).sum)
+    val results = Ratings.calculate(Ratings.fetchAll(getRemote, "Sheet1"))
+    println(results._2)
+    println()
+    println(results._1)
