@@ -62,8 +62,8 @@ object Team:
     meta: Map[String, TeamMeta]): Team =
 
     val regularWins = debateResults.filter(d => d.regularMatchFor(team) && d.winner == team).length
-    val regularBallots = debateResults.map(_.ballots(team)).sum
-    val regularPoints = debateResults.map(_.points(team)).sum
+    val regularBallots = debateResults.filter(_.regularMatchFor(team)).map(_.ballots(team)).sum
+    val regularPoints = debateResults.filter(_.regularMatchFor(team)).map(_.points(team)).sum
     val regularN = debateResults.filter(_.regularMatchFor(team)).length
 
     val mixedN = debateResults.filter(_.mixedMatchFor(team)).length
