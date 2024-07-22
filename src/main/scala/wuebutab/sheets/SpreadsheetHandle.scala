@@ -70,6 +70,11 @@ class SpreadsheetHandle(
     val request = service.spreadsheets.values.update(spreadsheetId, range, valueRange).setValueInputOption("RAW")
     request.execute()
 
+  def writeRangeRaw(range: String, content: Seq[Seq[Double | Int | String]]): Unit =
+    val valueRange = ValueRange().setValues(content.map(_.toList.asJava).toList.asJava)
+    val request = service.spreadsheets.values.update(spreadsheetId, range, valueRange).setValueInputOption("RAW")
+    request.execute()
+
 object SpreadsheetHandle:
 
   def apply(id: String): Try[SpreadsheetHandle] =

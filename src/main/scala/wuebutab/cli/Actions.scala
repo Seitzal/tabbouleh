@@ -112,7 +112,6 @@ object Actions:
       if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
 
   def test(): Unit =
-    val results = Ratings.calculate(Ratings.fetchAll(getRemote, "Sheet1"))
-    println(results._2)
-    println()
-    println(results._1)
+    val ratings = Ratings.calculate(Ratings.fetchAll(getRemote, "Match Results"))
+    getRemote.writeRangeRaw("Match Results!H2", ratings.rows.map(_.toVector))
+    getRemote.writeRangeRaw("Table", ratings.table)
