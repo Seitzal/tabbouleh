@@ -20,9 +20,9 @@ object Speech:
 
   def getHomeTeams(data: SeqTable): Map[(String, Int), String] =
     data
-      .filter(row => row(0).startsWith("Swing") | row(0).startsWith("Mixed"))
+      .filter(row => row(0).toString.startsWith("Swing") | row(0).toString.startsWith("Mixed"))
       .filter(row => row(1) != "")
-      .map(row => (row(2), row(4).toInt) -> row(1))
+      .map(row => (row(2).toString, row(4).parseInt) -> row(1).toString)
       .toMap
 
   def getAll(ballots: Vector[Ballot], names: Names, old: Option[SeqTable]): Vector[Speech] =
@@ -64,7 +64,3 @@ object Speech:
       TableField("Type", _.speechType, false),
       TableField("Score", _.score.dpl(2), true),
     )
-
-    def to_csv(s: Speech) = ???
-
-    def order_csv(keys: Set[String]): Seq[String] = ???

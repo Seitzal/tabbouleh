@@ -1,7 +1,107 @@
 {
-  "sheetNames" : {
-    "ballots" : "Formularantworten 1",
-    "structure" : "Structure",
-    "teams" : "Teams"
+  "sheetNames": {
+    "ballots": "Formularantworten 1",
+    "structure": "Structure",
+    "teams": "Teams"
+  },
+  "tableKeys": {
+    "ballots": {
+      "round": {
+        "localizedTitle": "Round Number",
+        "defaultPosition": 0
+      },
+      "judgeEmail": {
+        "localizedTitle": "Email address",
+        "defaultPosition": 1
+      },
+      "judgeName": {
+        "localizedTitle": "Name of Judge",
+        "defaultPosition": 2
+      },
+      "judgeStatus": {
+        "localizedTitle": "Status of Judge",
+        "defaultPosition": 3
+      },
+      "prop": {
+        "localizedTitle": "Name of Proposition Team/School",
+        "defaultPosition": 4
+      },
+      "opp": {
+        "localizedTitle": "Name of OppositionTeam/School",
+        "defaultPosition": 5
+      },
+      "propNames1": {
+        "localizedTitle": "Name of Proposition 1st speaker",
+        "defaultPosition": 6
+      },
+      "propNames2": {
+        "localizedTitle": "Name of Proposition 2nd speaker",
+        "defaultPosition": 7
+      },
+      "propNames3": {
+        "localizedTitle": "Name of Proposition 3rd speaker",
+        "defaultPosition": 8
+      },
+      "propNames4": {
+        "localizedTitle": "Name of Proposition reply speaker",
+        "defaultPosition": 9
+      },
+      "propScores1": {
+        "localizedTitle": "Score of Proposition 1st speaker",
+        "defaultPosition": 10
+      },
+      "propScores2": {
+        "localizedTitle": "Score of Proposition 2nd speaker",
+        "defaultPosition": 11
+      },
+      "propScores3": {
+        "localizedTitle": "Score of Proposition 3rd speaker",
+        "defaultPosition": 12
+      },
+      "propScores4": {
+        "localizedTitle": "Score of Proposition reply speaker (30-40)",
+        "defaultPosition": 13
+      },
+      "oppNames1": {
+        "localizedTitle": "Name of Opposition 1st speaker",
+        "defaultPosition": 14
+      },
+      "oppNames2": {
+        "localizedTitle": "Name of Opposition 2nd speaker",
+        "defaultPosition": 15
+      },
+      "oppNames3": {
+        "localizedTitle": "Name of Opposition 3rd speaker",
+        "defaultPosition": 16
+      },
+      "oppNames4": {
+        "localizedTitle": "Name of Opposition reply speaker",
+        "defaultPosition": 17
+      },
+      "oppScores1": {
+        "localizedTitle": "Score of Opposition 1st speaker",
+        "defaultPosition": 18
+      },
+      "oppScores2": {
+        "localizedTitle": "Score of Opposition 2nd speaker",
+        "defaultPosition": 19
+      },
+      "oppScores3": {
+        "localizedTitle": "Score of Opposition 3rd speaker",
+        "defaultPosition": 20
+      },
+      "oppScores4": {
+        "localizedTitle": "Score of Opposition reply speaker (30-40)",
+        "defaultPosition": 21
+      },
+      "winningTeam": {
+        "localizedTitle": "Winning Team/School",
+        "defaultPosition": 22
+      },
+      "winningSide": {
+        "localizedTitle": "Winning Side (this MUST be the side with the higher total score)",
+        "defaultPosition": 23
+      }
+    }
   }
 }

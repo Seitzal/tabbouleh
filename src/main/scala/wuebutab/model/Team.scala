@@ -15,10 +15,10 @@ object TeamMeta:
     new TeamMeta(
       tableFields.getOrElse("Division", "univ."),
       tableFields.getOrElse("Active", "1") != "0",
-      tableFields.getOrElse("Pull-ups", "0").toInt,
+      tableFields.getOrElse("Pull-ups", "0").parseInt,
       tableFields
         .filter((k, v) => k.startsWith("Side ") && Side.fromSymbol(v).isDefined)
-        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v).get)
+        .map((k, v) => k.drop(5).parseInt -> Side.fromSymbol(v).get)
     )
 
   def getAll(table: Vector[Vector[String]]) =
@@ -103,20 +103,20 @@ object Team:
 
   def apply(kv: Map[String, String]): Team = new Team(
     kv("Name"),
-    kv.getOrElse("Wins", "0").toInt,
-    kv.getOrElse("Ballots", "0").toInt,
+    kv.getOrElse("Wins", "0").parseInt,
+    kv.getOrElse("Ballots", "0").parseInt,
     kv.getOrElse("Points", "0").toDouble,
     SidePref(
-      kv.getOrElse("Balance", "0").toInt,
-      kv.getOrElse("Prep", "0").toInt,
-      kv.getOrElse("Impr", "0").toInt),
+      kv.getOrElse("Balance", "0").parseInt,
+      kv.getOrElse("Prep", "0").parseInt,
+      kv.getOrElse("Impr", "0").parseInt),
     kv.keys.filter(_.startsWith("Opponent")).toVector.sorted.map(kv),
     TeamMeta(
       kv.getOrElse("Division", ""),
       kv.getOrElse("Active", "true").toBoolean,
-      kv.getOrElse("Pull-ups", "0").toInt,
+      kv.getOrElse("Pull-ups", "0").parseInt,
       kv.filter((k, v) => k.startsWith("Side") && Side.fromSymbol(v).isDefined)
-        .map((k, v) => k.drop(5).toInt -> Side.fromSymbol(v).get)))
+        .map((k, v) => k.drop(5).parseInt -> Side.fromSymbol(v).get)))
     
   def getAll(debateResults: Vector[DebateResults], rounds: Vector[Round], meta: Map[String, TeamMeta]) =
     for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser) ++ meta.keys).distinct
@@ -144,15 +144,3 @@ object Team:
       TableField("Pull-ups", _.meta.pull_ups.toString, true),
       TableField("Active", t => if t.meta.active then "1" else "0", false),
       TableField("Division", _.meta.division, false))
-
-    def to_csv(tr: Team): Map[String, String] = Map(
-      "Team" -> tr.name,
-      "Wins" -> tr.wins.toString,
-      "Ballots" -> tr.ballots.toString,
-      "Points" -> tr.points.toString,
-      "SidePref" -> tr.side_pref.overall.toString,
-      "SidePrefPrep" -> tr.side_pref.prep.toString,
-      "SidePrefImpr" -> tr.side_pref.impr.toString)
-
-    def order_csv(keys: Set[String]): Seq[String] =
-      Vector("Team", "Wins", "Ballots", "Points", "SidePref", "SidePrefPrep", "SidePrefImpr")

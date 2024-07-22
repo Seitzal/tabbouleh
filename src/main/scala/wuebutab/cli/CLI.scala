@@ -18,6 +18,8 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
   object fetch extends Subcommand("fetch", "f")
 
+  object rank extends Subcommand("rank", "r")
+
   object pair extends Subcommand("pair", "p"):
 
     val update = toggle(default = Some(true))
@@ -44,6 +46,7 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
   addSubcommand(remote)
   addSubcommand(fetch)
+  addSubcommand(rank)
   addSubcommand(pair)
   addSubcommand(speakers)
   addSubcommand(alloc)
@@ -59,6 +62,9 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
     case Some(_: this.fetch.type) => 
       Actions.checkBallots()
+
+    case Some(_: this.rank.type) =>
+      Actions.updateRankings()
 
     case Some(_: this.pair.type) =>
       val rounds = this.pair.rounds.get

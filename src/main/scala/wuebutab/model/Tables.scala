@@ -1,26 +1,58 @@
 package wuebutab
 
 import scala.jdk.CollectionConverters._
+import ujson.Bool
 
-type SeqTable = Seq[Seq[String]]
+opaque type TableHeader = Vector[String]
+
+object TableHeader:
+  def apply(headings: Vector[String]): TableHeader = headings
+
+extension (tk: TableHeader)
+  def findIgnoreCase(column: String): Int = tk.indexWhere(s => s.equalsIgnoreCase(column))
+  def findLocalized(column: String, key: TableKey): Int =
+    println(s"findLocalized: $column")
+    val keycol = key(column)
+    println(keycol)
+    val loc = keycol.localizedTitle
+    println(loc)
+    val index = tk.indexOf(loc)
+    println(index)
+    tk.findIgnoreCase(key(column).localizedTitle)
+
+type SeqTableContent = String | Int | Double | Boolean
+
+extension (c: SeqTableContent)
+
+  def parseInt: Int = c match
+    case s: String => s.toInt
+    case i: Int => i
+    case d: Double => if d.isValidInt then d.toInt else throw NumberFormatException(s"$d is not an integer.")
+    case true => 1
+    case false => 0
+
+  def asJavaObject: Object = c match
+    case s: String => s
+    case i: Int => Integer(i)
+    case d: Double => java.lang.Double(d)
+    case b: Boolean => java.lang.Boolean(b)
+
+type SeqTable = Seq[Seq[SeqTableContent]]
 
 case class TableField[T](
   name: String,
-  f: T => Any,
+  f: T => SeqTableContent,
   align_right: Boolean = false)
 
 trait Tabulatable[T]:
   def fields: Seq[TableField[T]]
   def names: Seq[String] = fields.map(_.name)
-  def to_csv(t: T): Map[String, String]
-  def order_csv(keys: Set[String]): Seq[String]
 
 extension[T](t: T)(using tb: Tabulatable[T])
-  def asSeq: Seq[Any] = tb.fields.map(field => field.f(t))
-  def asStringSeq: Seq[String] = t.asSeq.map(_.toString)
+  def asTableRow: Seq[SeqTableContent] = tb.fields.map(field => field.f(t))
 
 extension[T](ts: Seq[T])(using tb: Tabulatable[T])
-  def asSeqTable: SeqTable = tb.names +: ts.map(_.asStringSeq)
+  def asSeqTable: SeqTable = tb.names +: ts.map(_.asTableRow)
 
 extension[T] (ts: java.util.List[java.util.List[T]])
   def asNestedSeq: Vector[Vector[String]] =
@@ -32,13 +64,13 @@ extension[T] (ts: Seq[T])
 extension (t: SeqTable)
 
   def select(cols: Set[String]): SeqTable =
-    val is = for i <- 0 until t.head.length if cols.contains(t.head(i)) yield i
+    val is = for i <- 0 until t.head.length if cols.contains(t.head(i).toString) yield i
     t.map(_.multiIndex(is))
 
   def select(cols: String*): SeqTable = t.select(cols.toSet)
 
   def asJavaNestedList: java.util.List[java.util.List[Object]] =
-    t.map(_.toList.asJava).toList.asJava
+    t.map(_.map(_.asJavaObject).toList.asJava).toList.asJava
 
   def padRight: SeqTable =
     val maxLength = t.map(_.length).max

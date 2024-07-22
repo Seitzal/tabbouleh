@@ -58,7 +58,3 @@ object Speaker:
       TableField("Ballots", _.ballots.toString, true),
       TableField("Average", _.average.dpl(4), true)
     )
-
-    def to_csv(s: Speaker) = ???
-
-    def order_csv(keys: Set[String]): Seq[String] = ???

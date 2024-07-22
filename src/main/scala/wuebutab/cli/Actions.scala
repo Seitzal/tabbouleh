@@ -4,6 +4,11 @@ import java.io.{File, PrintWriter}
 import scala.io.Source
 import scala.util.{Try, Success, Failure}
 
+import scala.jdk.CollectionConverters._
+
+import com.google.api.services.sheets.v4._
+import com.google.api.services.sheets.v4.model._
+
 object Actions:
 
   private def getRemote: SpreadsheetHandle = 
@@ -34,6 +39,20 @@ object Actions:
     problems.foreach(println)
     println(Results(ballots, rounds, meta))
 
+  def updateRankings(): Unit =
+    val remote = getRemote
+    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val problems = Ballot.checkAll(ballots)
+    if !problems.isEmpty then
+      println("Some ballots are problematic. Please address problems before pairing, or override with '-f'.")
+      println(s"${problems.length} problems found:")
+      problems.foreach(println)
+    else
+      val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+      val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+      val results = Results(ballots, structure, meta)
+      Team.updateRemote(remote, Config.default.sheetNames.teams, results.teams)
+
   def generatePairings(rounds: Option[List[Int]], update: Boolean): Unit =
     val remote = getRemote
     val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
@@ -59,7 +78,6 @@ object Actions:
               println(s"Pairings for round ${round.roundNo}:")
               println(render_table(pairings))
               if update then 
-                write_csv(pairings, File(s"pairings${round.roundNo}.csv"))
                 val sheetName = s"Round ${round.roundNo}"
                 if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
                 remote.writeRange(sheetName, pairings.asSeqTable.select("Div", "Prop", "Opp"))
@@ -68,8 +86,7 @@ object Actions:
               println(s"Couldn't generate pairings for round ${rounds_remaining.head}: Not found in structure.")
               iter(rounds_remaining.tail, teams)
         else if update then
-            write_csv(teams, File("teams.csv"))
-            Team.updateRemote(remote, Config.default.sheetNames.teams, teams)
+          Team.updateRemote(remote, Config.default.sheetNames.teams, teams)
       rounds match
         case Some(rs) => iter(rs, results.teams) 
         case None => iter(List(results.rounds_completed.max + 1), results.teams)
@@ -112,6 +129,17 @@ object Actions:
       if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
 
   def test(): Unit =
-    val ratings = Ratings.calculate(Ratings.fetchAll(getRemote, "Match Results"))
-    getRemote.writeRangeRaw("Match Results!H2", ratings.rows.map(_.toVector))
-    getRemote.writeRangeRaw("Table", ratings.table)
+    val remote = getRemote
+    val data = java.util.ArrayList[java.util.List[Object]]()
+    val data1 = java.util.ArrayList[Object]()
+    data1.add("String")
+    data1.add(java.lang.Integer(1))
+    data1.add(java.lang.Double(2.5))
+    data.add(data1)
+    val valueRange = ValueRange().setValues(data)
+    val request = remote.service.spreadsheets.values.update(remote.spreadsheetId, "Test!A1", valueRange).setValueInputOption("RAW")
+    request.execute()
+    val data_s = List(List("String", java.lang.Integer(1), java.lang.Double(2.5)))
+    val valueRange_s = ValueRange().setValues(data_s.map(_.asJava).asJava)
+    val request_s = remote.service.spreadsheets.values.update(remote.spreadsheetId, "Test!A2", valueRange_s).setValueInputOption("RAW")
+    request_s.execute()

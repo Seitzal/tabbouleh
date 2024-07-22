@@ -5,6 +5,17 @@ import monocle._
 import monocle.syntax.all._
 import cats.implicits._
 
+trait JudgeStatus
+
+object JudgeStatus:
+  case object Chair extends JudgeStatus
+  case object Panellist extends JudgeStatus
+  case object Shadow extends JudgeStatus
+  def apply(s: String): JudgeStatus = s match
+    case s if s.startsWith("Chair") => Chair
+    case s if s.startsWith("Panel") => Panellist
+    case s if s.startsWith("Shadow") => Shadow
+
 enum Side(val symbol: String):
   case Proposition extends Side("P")
   case Opposition extends Side("O")

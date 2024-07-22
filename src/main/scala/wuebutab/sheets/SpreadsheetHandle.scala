@@ -22,7 +22,7 @@ class SpreadsheetHandle(
 
   private val auth = Auth(credentialsPath, tokensPath, transport)
 
-  private val service = 
+  val service = 
     new Sheets.Builder(transport, GsonFactory.getDefaultInstance(), auth.credential)
       .setApplicationName(applicationName)
       .build

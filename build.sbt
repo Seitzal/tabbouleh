@@ -10,7 +10,6 @@ lazy val wuebutab = (project in file("."))
       "org.rogach"              %% "scallop"                    % "5.0.0",
       "dev.optics"              %% "monocle-core"               % "3.2.0",
       "dev.optics"              %% "monocle-macro"              % "3.2.0",
-      "com.github.tototoshi"    %% "scala-csv"                  % "1.3.10",
       "com.lihaoyi"             %% "upickle"                    % "3.2.0",
       "org.jgrapht"             %  "jgrapht-core"               % "1.5.2",
       "com.google.api-client"   %  "google-api-client"          % "2.0.0",

@@ -71,21 +71,6 @@ object DebateResults:
       TableField("P", _.pointsOpp.dpl(2), true),
       TableField("Opp", _.opp, false))
 
-    def to_csv(dr: DebateResults): Map[String, String] = Map(
-      "Round" -> dr.round.toString,
-      "Proposition Team" -> dr.prop,
-      "Opposition Team" -> dr.opp,
-      "Winning Team" -> dr.winner,
-      "Winning Side" -> dr.winningSide,
-      "Proposition Ballots" -> dr.ballotsProp.toString,
-      "Opposition Ballots" -> dr.ballotsOpp.toString,
-      "Proposition Points" -> dr.pointsProp.toString,
-      "Opposition Points" -> dr.pointsOpp.toString)
-
-    def order_csv(keys: Set[String]): Seq[String] =
-      Vector("Round", "Proposition Team", "Opposition Team", "Winning Team", "Winning Side", "Proposition Ballots", 
-        "Opposition Ballots", "Proposition Points", "Opposition Points")
-
 class Results(ballots: Vector[Ballot], rounds: Vector[Round], meta: Map[String, TeamMeta]):
 
   val debateResults = ballots

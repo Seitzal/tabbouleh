@@ -9,8 +9,20 @@ case class ConfigSheetNames(
   teams: String
 ) derives ReadWriter
 
+case class TableKeyColumn(
+  localizedTitle: String,
+  defaultPosition: Int
+) derives ReadWriter
+
+type TableKey = Map[String, TableKeyColumn]
+
+case class ConfigTableKeys(
+  ballots: TableKey
+) derives ReadWriter
+
 case class Config(
-  sheetNames: ConfigSheetNames
+  sheetNames: ConfigSheetNames,
+  tableKeys: ConfigTableKeys
 ) derives ReadWriter
 
 object Config:

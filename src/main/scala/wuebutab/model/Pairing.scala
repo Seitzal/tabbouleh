@@ -54,12 +54,3 @@ object Pairing:
       TableField("B", _.opp.ballots, true),
       TableField("P", _.opp.points.dpl(2), true),
       TableField("SP",  p => p.opp.side_pref(p.dt), true))
-
-    def to_csv(p: Pairing): Map[String, String] = Map(
-        "MRS" -> p.mean_rank_score.toString,
-        "Weight" -> p.weight.toString,
-        "Proposition Team" -> p.prop.name,
-        "Opposition Team" -> p.opp.name)
-
-    def order_csv(keys: Set[String]): Seq[String] =
-      Vector("MRS", "Weight", "Proposition Team", "Opposition Team")

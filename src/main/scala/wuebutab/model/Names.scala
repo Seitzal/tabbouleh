@@ -25,7 +25,9 @@ object Names:
   def empty = Names(Map())
 
   def apply(t: SeqTable): Names =
-    val entries = for row <- t.tail yield Name(row(0), row(1)) -> row(2)
+    val entries = 
+      for row <- t.tail 
+      yield Name(row(0).toString, row(1).toString) -> row(2).toString
     Names(entries.distinct.toMap)
 
   def fetch(sheet: SpreadsheetHandle, range: String): Names =

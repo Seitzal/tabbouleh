@@ -33,13 +33,3 @@ object Panel:
       TableField("Panelist 1", _.panelist1.map(_.name).getOrElse(""), false),
       TableField("Panelist 2", _.panelist2.map(_.name).getOrElse(""), false))
 
-    def to_csv(p: Panel): Map[String, String] = Map(
-        "Division" -> p.pairing.division,
-        "Proposition Team" -> p.pairing.prop.name,
-        "Opposition Team" -> p.pairing.opp.name,
-        "Chair" -> p.chair.name,
-        "Panelist 1" -> p.panelist1.map(_.name).getOrElse(""),
-        "Panelist 2" -> p.panelist2.map(_.name).getOrElse(""))
-
-    def order_csv(keys: Set[String]): Seq[String] =
-      Vector("Division", "Proposition Team", "Opposition Team", "Chair", "Panelist 1", "Panelist 2")
