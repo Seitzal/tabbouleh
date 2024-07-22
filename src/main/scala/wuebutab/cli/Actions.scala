@@ -11,12 +11,16 @@ import com.google.api.services.sheets.v4.model._
 
 object Actions:
 
+  given Config = Config.default
+
   private def getRemote: SpreadsheetHandle = 
     SpreadsheetHandle(Source.fromFile("remote").mkString) match
       case Success(sheet) => sheet
       case Failure(e) => 
         println("Error accessing remote. Please confirm that credentials and spreadsheet ID are correct.")
         throw(e)
+  
+  given SpreadsheetHandle = getRemote
 
   def setRemote(spreadsheetId: String): Unit = 
     SpreadsheetHandle(spreadsheetId) match
@@ -31,17 +35,17 @@ object Actions:
   
   def checkBallots(): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val ballots = Ballot.fetchAll
     val rounds = Round.fetchAll(remote, Config.default.sheetNames.structure)
     val problems = Ballot.checkAll(ballots)
-    val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+    val meta = TeamMeta.fetchAll
     println(s"${ballots.length} ballots checked, ${problems.length} problems found:")
     problems.foreach(println)
     println(Results(ballots, rounds, meta))
 
   def updateRankings(): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val ballots = Ballot.fetchAll
     val problems = Ballot.checkAll(ballots)
     if !problems.isEmpty then
       println("Some ballots are problematic. Please address problems before pairing, or override with '-f'.")
@@ -49,13 +53,14 @@ object Actions:
       problems.foreach(println)
     else
       val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
-      val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+      val meta = TeamMeta.fetchAll
       val results = Results(ballots, structure, meta)
-      Team.updateRemote(remote, Config.default.sheetNames.teams, results.teams)
+      println(results.teams.renderTable(Config.default.tableKeys.teams))
+      results.teams.updateRemote()
 
   def generatePairings(rounds: Option[List[Int]], update: Boolean): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val ballots = Ballot.fetchAll
     val problems = Ballot.checkAll(ballots)
     if !problems.isEmpty then
       println("Some ballots are problematic. Please address problems before pairing, or override with '-f'.")
@@ -63,7 +68,7 @@ object Actions:
       problems.foreach(println)
     else
       val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
-      val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+      val meta = TeamMeta.fetchAll
       val results = Results(ballots, structure, meta)
       def iter(rounds_remaining: List[Int], teams: Vector[Team]): Unit =
         if !rounds_remaining.isEmpty then
@@ -76,7 +81,7 @@ object Actions:
                 round.roundNo)
                 .sortBy(p => (p.division, p.mean_rank_score)) 
               println(s"Pairings for round ${round.roundNo}:")
-              println(render_table(pairings))
+              println(pairings.renderTable)
               if update then 
                 val sheetName = s"Round ${round.roundNo}"
                 if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
@@ -86,14 +91,14 @@ object Actions:
               println(s"Couldn't generate pairings for round ${rounds_remaining.head}: Not found in structure.")
               iter(rounds_remaining.tail, teams)
         else if update then
-          Team.updateRemote(remote, Config.default.sheetNames.teams, teams)
+          teams.updateRemote()
       rounds match
         case Some(rs) => iter(rs, results.teams) 
         case None => iter(List(results.rounds_completed.max + 1), results.teams)
   
   def generateSpeakerRanking(minRounds: Int): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val ballots = Ballot.fetchAll
     val names = if remote.sheetExists("Names") then Names.fetch(remote, "Names") else Names.empty
     val speeches_old = if remote.sheetExists("Speeches") then Some(remote.readRange("Speeches")) else None
     val speeches = Speech.getAll(ballots, names, speeches_old)
@@ -107,16 +112,18 @@ object Actions:
     if !remote.sheetExists("Speaker Ranking") then remote.createSheet("Speaker Ranking")
     remote.writeRange("Speaker Ranking", Vector("Rank") +: (1 to ranking.length).map(i => Vector(i.toString)))
     remote.writeRange("Speaker Ranking!B1", ranking.asSeqTable)
-    println(render_table(ranking))
+    println(ranking.renderTable)
 
   def allocateJudges(round: Int, update: Boolean): Unit =
     val remote = getRemote
-    val ballots = Ballot.fetchAll(remote, Config.default.sheetNames.ballots)
+    val ballots = Ballot.fetchAll
     val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
-    val meta = TeamMeta.fetchAll(remote, Config.default.sheetNames.teams)
+    val meta = TeamMeta.fetchAll
     val results = Results(ballots, structure, meta)
     val draws = Draw.fetchAll(remote)
-    val judges = Judge.fetchAll(remote, "Judges").map(_.updateForRounds(draws.values.toSeq))
+    val judges = 
+      Judge.fetchAll
+        .map(_.updateForRounds(draws.values.toSeq))
     if !draws.isDefinedAt(round) then throw Error(s"No pairings for round $round found in remote.")
     else
       val draw = draws(round)
@@ -125,7 +132,7 @@ object Actions:
         val opp = results.teams.filter(_.name == row(2)).head
         Pairing(prop, opp, DebateType.Impromptu, 0d)
       val panels = make_panels(pairings, judges.filter(_.active), PanelWeights())
-      println(render_table(panels))
+      println(panels.renderTable)
       if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
 
   def test(): Unit =

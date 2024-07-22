@@ -54,43 +54,44 @@ case class Ballot(
     
 object Ballot:
 
-  def apply(row: Vector[String], header: TableHeader, key: TableKey): Ballot = Ballot(
-    row(header.findLocalized("round", key)).parseInt,
-    row(header.findLocalized("judgeEmail", key)),
-    row(header.findLocalized("judgeName", key)),
-    JudgeStatus(row(header.findLocalized("judgeStatus", key))),
-    row(header.findLocalized("prop", key)),
-    row(header.findLocalized("opp", key)),
-    Vector(
-      row(header.findLocalized("propNames1", key)), 
-      row(header.findLocalized("propNames2", key)), 
-      row(header.findLocalized("propNames3", key)),
-      row(header.findLocalized("propNames4", key))),
-    Vector(
-      row(header.findLocalized("propScores1", key)).toDouble, 
-      row(header.findLocalized("propScores2", key)).toDouble, 
-      row(header.findLocalized("propScores3", key)).toDouble,
-      row(header.findLocalized("propScores4", key)).toDouble),
-    Vector(
-      row(header.findLocalized("oppNames1", key)), 
-      row(header.findLocalized("oppNames2", key)), 
-      row(header.findLocalized("oppNames3", key)),
-      row(header.findLocalized("oppNames4", key))),
-    Vector(
-      row(header.findLocalized("oppScores1", key)).toDouble, 
-      row(header.findLocalized("oppScores2", key)).toDouble, 
-      row(header.findLocalized("oppScores3", key)).toDouble,
-      row(header.findLocalized("oppScores4", key)).toDouble),
-    row(header.findLocalized("winningTeam", key)),
-    row(header.findLocalized("winningSide", key))
-  )
+  def apply(row: Vector[String], header: TableHeader)(using config: Config): Ballot = 
+    val key = config.tableKeys.ballots
+      Ballot(
+      row(header.findLocalized("round", key)).parseInt,
+      row(header.findLocalized("judgeEmail", key)),
+      row(header.findLocalized("judgeName", key)),
+      JudgeStatus(row(header.findLocalized("judgeStatus", key))),
+      row(header.findLocalized("prop", key)),
+      row(header.findLocalized("opp", key)),
+      Vector(
+        row(header.findLocalized("propNames1", key)), 
+        row(header.findLocalized("propNames2", key)), 
+        row(header.findLocalized("propNames3", key)),
+        row(header.findLocalized("propNames4", key))),
+      Vector(
+        row(header.findLocalized("propScores1", key)).toDouble, 
+        row(header.findLocalized("propScores2", key)).toDouble, 
+        row(header.findLocalized("propScores3", key)).toDouble,
+        row(header.findLocalized("propScores4", key)).toDouble),
+      Vector(
+        row(header.findLocalized("oppNames1", key)), 
+        row(header.findLocalized("oppNames2", key)), 
+        row(header.findLocalized("oppNames3", key)),
+        row(header.findLocalized("oppNames4", key))),
+      Vector(
+        row(header.findLocalized("oppScores1", key)).toDouble, 
+        row(header.findLocalized("oppScores2", key)).toDouble, 
+        row(header.findLocalized("oppScores3", key)).toDouble,
+        row(header.findLocalized("oppScores4", key)).toDouble),
+      row(header.findLocalized("winningTeam", key)),
+      row(header.findLocalized("winningSide", key))
+    )
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String): Vector[Ballot] =
-    val table = sheet.readRange(range)
-    val header = TableHeader(table.head)
+  def fetchAll(using remote: SpreadsheetHandle, config: Config): Vector[Ballot] =
+    val table = remote.readRange(config.sheetNames.ballots)
     table
       .tail
-      .map(row => Ballot(row, header, Config.default.tableKeys.ballots))
+      .map(row => Ballot(row, TableHeader(table.head)))
       .filter(_.judgeStatus != JudgeStatus.Shadow)
 
   def checkAll(ballots: Vector[Ballot]): Vector[String] =

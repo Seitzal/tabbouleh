@@ -6,18 +6,14 @@ import java.io.File
 case class ConfigSheetNames(
   ballots: String,
   structure: String,
-  teams: String
+  teams: String,
+  judges: String
 ) derives ReadWriter
-
-case class TableKeyColumn(
-  localizedTitle: String,
-  defaultPosition: Int
-) derives ReadWriter
-
-type TableKey = Map[String, TableKeyColumn]
 
 case class ConfigTableKeys(
-  ballots: TableKey
+  ballots: TableKey,
+  teams: TableKey,
+  judges: TableKey
 ) derives ReadWriter
 
 case class Config(

@@ -11,22 +11,26 @@ case class TeamMeta(
 
 object TeamMeta:
 
-  def apply(tableFields: Map[String, String]) =
-    new TeamMeta(
-      tableFields.getOrElse("Division", "univ."),
-      tableFields.getOrElse("Active", "1") != "0",
-      tableFields.getOrElse("Pull-ups", "0").parseInt,
-      tableFields
-        .filter((k, v) => k.startsWith("Side ") && Side.fromSymbol(v).isDefined)
-        .map((k, v) => k.drop(5).parseInt -> Side.fromSymbol(v).get)
+  def apply(row: Vector[String], header: TableHeader)(using config: Config): (String, TeamMeta) =
+    val key = config.tableKeys.teams
+    val sidelocked_rounds = header.suffixes("sidelock_prefix", key).map(_.toInt)
+    val sides = row.multiIndex(header.findLocalizedMulti("sidelock_prefix", key)).map(Side.fromSymbol)
+    val sidelock = 
+      sidelocked_rounds.zip(sides)
+      .filter(_._2.isDefined)
+      .map((round, sideOpt) => (round, sideOpt.get))
+      .toMap
+    row(header.findLocalized("team", key)) -> TeamMeta(
+      row(header.findLocalized("division", key)).ifEmpty("univ."),
+      row(header.findLocalized("active", key)).ifEmpty("false").toBoolean,
+      row(header.findLocalized("pull_ups", key)).ifEmpty("0").toInt,
+      sidelock
     )
 
-  def getAll(table: Vector[Vector[String]]) =
-    val nameColumn = table.head.indexOf("Team")
-    (for row <- table.tail yield row(nameColumn) -> TeamMeta(table.head.zip(row).toMap)).toMap
-
-  def fetchAll(remote: SpreadsheetHandle, range: String) =
-    if remote.rangeExists(range) then getAll(remote.readRange(range)) else Map()
+  def fetchAll(using remote: SpreadsheetHandle, config: Config): Map[String, TeamMeta] =
+    if !remote.rangeExists(config.sheetNames.teams) then return Map()
+    val table = remote.readRange(config.sheetNames.teams)
+    table.tail.map(row => TeamMeta(row, TableHeader(table.head))).toMap
 
 case class Team(
   name: String,
@@ -100,47 +104,36 @@ object Team:
       sidePref,
       previous_opponents,
       meta.getOrElse(team, TeamMeta("univ.", true, 0, Map())))
-
-  def apply(kv: Map[String, String]): Team = new Team(
-    kv("Name"),
-    kv.getOrElse("Wins", "0").parseInt,
-    kv.getOrElse("Ballots", "0").parseInt,
-    kv.getOrElse("Points", "0").toDouble,
-    SidePref(
-      kv.getOrElse("Balance", "0").parseInt,
-      kv.getOrElse("Prep", "0").parseInt,
-      kv.getOrElse("Impr", "0").parseInt),
-    kv.keys.filter(_.startsWith("Opponent")).toVector.sorted.map(kv),
-    TeamMeta(
-      kv.getOrElse("Division", ""),
-      kv.getOrElse("Active", "true").toBoolean,
-      kv.getOrElse("Pull-ups", "0").parseInt,
-      kv.filter((k, v) => k.startsWith("Side") && Side.fromSymbol(v).isDefined)
-        .map((k, v) => k.drop(5).parseInt -> Side.fromSymbol(v).get)))
     
   def getAll(debateResults: Vector[DebateResults], rounds: Vector[Round], meta: Map[String, TeamMeta]) =
     for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser) ++ meta.keys).distinct
     yield Team(team, debateResults, rounds, meta) 
 
-  def updateRemote(remote: SpreadsheetHandle, sheetName: String, teams: Vector[Team]): Unit =
-    if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
-    remote.writeRange(s"$sheetName!B1", teams.asSeqTable)
+extension(teams: Vector[Team])
+
+  def updateRemote()(using remote: SpreadsheetHandle, config: Config): Unit =
+    val sheet = config.sheetNames.teams
+    if !remote.sheetExists(sheet) then remote.createSheet(sheet)
+    remote.writeRange(s"$sheet!A1", 
+      Vector(config.tableKeys.teams("rank")) +: 
+      (for i <- 1 to teams.length yield Vector(i)).toVector)
+    remote.writeRange(s"$sheet!B1", teams.asSeqTable(config.tableKeys.teams))
     val sidelocked_rounds = teams.map(_.meta.sidelock.keySet).reduce(_.union(_)).toVector.sorted
     val sidelocks_table = 
-      sidelocked_rounds.map("Side " + _) +:
+      sidelocked_rounds.map(config.tableKeys.teams("sidelock_prefix") + _) +:
       teams.map(team => sidelocked_rounds.map(round => team.meta.sidelock.get(round).map(_.symbol).getOrElse("-")))
-    remote.writeRange(s"$sheetName!L1", sidelocks_table)
+    remote.writeRange(s"$sheet!L1", sidelocks_table)
 
-  given t: Tabulatable[Team] = new Tabulatable:
+given t: Tabulatable[Team] = new Tabulatable:
 
-    def fields = Seq(
-      TableField("Team", _.name, false),
-      TableField("Wins", _.wins.toString, true),
-      TableField("Ballots", _.ballots.toString, true),
-      TableField("Points", _.points.dpl(2), true),
-      TableField("SP", _.side_pref.overall.toString, true),
-      TableField("P", _.side_pref.prep.toString, true),
-      TableField("I", _.side_pref.impr.toString, true),
-      TableField("Pull-ups", _.meta.pull_ups.toString, true),
-      TableField("Active", t => if t.meta.active then "1" else "0", false),
-      TableField("Division", _.meta.division, false))
+  def fields = Seq(
+    TableField("team", _.name),
+    TableField("wins", _.wins, true),
+    TableField("ballots", _.ballots, true),
+    TableField("points", _.points, true, Some(_.points.dpl(2))),
+    TableField("sidepref", _.side_pref.overall, true),
+    TableField("sidepref_prep", _.side_pref.prep, true),
+    TableField("sidepref_impr", _.side_pref.impr, true),
+    TableField("pull_ups", _.meta.pull_ups, true),
+    TableField("active", _.meta.active),
+    TableField("division", _.meta.division))

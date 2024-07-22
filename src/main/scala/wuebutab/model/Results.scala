@@ -88,5 +88,5 @@ class Results(ballots: Vector[Ballot], rounds: Vector[Round], meta: Map[String, 
   val rounds_completed = debateResults.map(_.round).distinct
 
   override def toString(): String =
-    s"Results of ${debateResults.length} debates:\n" + render_table(debateResults) + "\n" +
-    s"Results for ${teams.length} teams after ${rounds_completed.length} rounds:\n" + render_table(teams)
+    s"Results of ${debateResults.length} debates:\n" + debateResults.renderTable + "\n" +
+    s"Results for ${teams.length} teams after ${rounds_completed.length} rounds:\n" + teams.renderTable

@@ -50,35 +50,29 @@ case class Judge(
 
 object Judge:
 
-  def fromRow(row: Vector[String]): Judge = Judge(
-    row(0),
-    if row(1) == "1" then true else false,
-    row(2),
-    row(3).parseInt,
-    0,
-    Vector(row(4), row(5), row(6)).filter(s => !s.isEmpty)
-  )
+  def apply(row: Vector[String], header: TableHeader)(using config: Config): Judge = 
+    val key = config.tableKeys.judges
+    Judge(
+      row(header.findLocalized("name", key)),
+      row(header.findLocalized("active", key)).toBoolean,
+      row(header.findLocalized("division", key)),
+      row(header.findLocalized("rating", key)).toInt,
+      0,
+      row.multiIndex(header.findLocalizedMulti("clash_prefix", key)).toVector.filter(s => !s.isEmpty)
+    )
 
-  def fetchAll(sheet: SpreadsheetHandle, range: String): Vector[Judge] =
-    sheet.readRange(range).tail.map(fromRow)
-
-  def apply(kv: Map[String, String]): Judge = Judge(
-    kv("Name"),
-    kv.getOrElse("Active", "true").toBoolean,
-    kv.getOrElse("Division", ""),
-    kv.getOrElse("Rating", "0").parseInt,
-    kv.getOrElse("Times Chair", "0").parseInt,
-    kv.keys.filter(_.startsWith("Clash")).toVector.sorted.map(kv).filter(_ != ""),
-    kv.keys.filter(_.startsWith("Team")).toVector.sorted.map(kv))
+  def fetchAll(using remote: SpreadsheetHandle, config: Config): Vector[Judge] =
+    val table = remote.readRange(config.sheetNames.judges)
+    val header = TableHeader(table.head)
+    table.tail.map(row => Judge(row, header))
 
   given t: Tabulatable[Judge] = new Tabulatable:
 
     def fields = Seq(
-      TableField("Name", _.name, false),
-      TableField("Active", _.active, false),
-      TableField("Division", _.division, false),
-      TableField("Rating", _.rating, true),
-      TableField("Times Chair", _.times_chair, true),
-      TableField("Clashes", _.clashes.length, true),
-      TableField("Seen", _.teams_prev.length, true))
-
+      TableField("name", _.name),
+      TableField("active", _.active),
+      TableField("division", _.division),
+      TableField("rating", _.rating, true),
+      TableField("times_chair", _.times_chair, true),
+      TableField("clashes", _.clashes.length, true),
+      TableField("seen", _.teams_prev.length, true))
