@@ -1,7 +1,7 @@
 {
   "sheetNames": {
     "ballots": "Formularantworten 1",
-    "structure": "Structure",
+    "rounds": "Structure",
     "teams": "Teams",
     "judges": "Judges"
   },
@@ -55,6 +55,12 @@
       "clashes": "Clashes",
       "seen": "Seen",
       "clash_prefix": "Clash "
+    },
+    "rounds": {
+      "number": "Round",
+      "debate_type": "Debate Type",
+      "weights": "Pairing",
+      "weight_random": "Random"
     }
   }
 }

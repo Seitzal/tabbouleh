@@ -5,7 +5,7 @@ import java.io.File
 
 case class ConfigSheetNames(
   ballots: String,
-  structure: String,
+  rounds: String,
   teams: String,
   judges: String
 ) derives ReadWriter
@@ -13,7 +13,8 @@ case class ConfigSheetNames(
 case class ConfigTableKeys(
   ballots: TableKey,
   teams: TableKey,
-  judges: TableKey
+  judges: TableKey,
+  rounds: TableKey
 ) derives ReadWriter
 
 case class Config(

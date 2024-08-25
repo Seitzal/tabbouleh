@@ -3,7 +3,6 @@
 ## Short term (1.0): Deliver functional, tested and clean CLI app
 
 * Refactor tables:
-  * structure
   * pairings
   * panels
   * names

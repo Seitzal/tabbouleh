@@ -36,7 +36,7 @@ object Actions:
   def checkBallots(): Unit =
     val remote = getRemote
     val ballots = Ballot.fetchAll
-    val rounds = Round.fetchAll(remote, Config.default.sheetNames.structure)
+    val rounds = Round.fetchAll
     val problems = Ballot.checkAll(ballots)
     val meta = TeamMeta.fetchAll
     println(s"${ballots.length} ballots checked, ${problems.length} problems found:")
@@ -52,7 +52,7 @@ object Actions:
       println(s"${problems.length} problems found:")
       problems.foreach(println)
     else
-      val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+      val structure = Round.fetchAll
       val meta = TeamMeta.fetchAll
       val results = Results(ballots, structure, meta)
       println(results.teams.renderTable(Config.default.tableKeys.teams))
@@ -67,7 +67,7 @@ object Actions:
       println(s"${problems.length} problems found:")
       problems.foreach(println)
     else
-      val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+      val structure = Round.fetchAll
       val meta = TeamMeta.fetchAll
       val results = Results(ballots, structure, meta)
       def iter(rounds_remaining: List[Int], teams: Vector[Team]): Unit =
@@ -117,7 +117,7 @@ object Actions:
   def allocateJudges(round: Int, update: Boolean): Unit =
     val remote = getRemote
     val ballots = Ballot.fetchAll
-    val structure = Round.fetchAll(remote, Config.default.sheetNames.structure)
+    val structure = Round.fetchAll
     val meta = TeamMeta.fetchAll
     val results = Results(ballots, structure, meta)
     val draws = Draw.fetchAll(remote)

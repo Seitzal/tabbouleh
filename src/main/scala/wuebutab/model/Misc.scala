@@ -30,6 +30,11 @@ enum DebateType(val symbol: String):
   case Impromptu extends DebateType("i")
   case Prepared extends DebateType("p")
 
+object DebateType:
+  def fromSymbol(symbol: String) =
+    if symbol.startsWith("i") || symbol.startsWith("I") then Impromptu
+    else Prepared
+
 case class SidePref(
   overall: Int = 0,
   prep: Int = 0,
