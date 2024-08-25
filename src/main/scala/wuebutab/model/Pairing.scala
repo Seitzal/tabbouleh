@@ -41,16 +41,25 @@ object Pairing:
   given t: Tabulatable[Pairing] = new Tabulatable:
 
     def fields = Seq(
-      TableField("Div", _.division, false),
-      TableField("MRS", _.mean_rank_score.dpl(6), true),
-      TableField("Weight", _.weight.dpl(6), true),
-      TableField("Prop", _.prop.name, false),
-      TableField("W", _.prop.wins, true),
-      TableField("B", _.prop.ballots, true),
-      TableField("P", _.prop.points.dpl(2), true),
-      TableField("SP",  p => p.prop.side_pref(p.dt), true),
-      TableField("Opp", _.opp.name, false),
-      TableField("W", _.opp.wins, true),
-      TableField("B", _.opp.ballots, true),
-      TableField("P", _.opp.points.dpl(2), true),
-      TableField("SP",  p => p.opp.side_pref(p.dt), true))
+      TableField("division", _.division, false),
+      TableField("mean_rank_score", _.mean_rank_score, true, Some(_.mean_rank_score.dpl(6))),
+      TableField("weight", _.weight, true, Some(_.weight.dpl(6))),
+      TableField("prop", _.prop.name, false),
+      TableField("wins_prop", _.prop.wins, true),
+      TableField("ballots_prop", _.prop.ballots, true),
+      TableField("points_prop", _.prop.points, true, Some(_.prop.points.dpl(2))),
+      TableField("sidepref_prop",  p => p.prop.side_pref(p.dt), true),
+      TableField("opp", _.opp.name, false),
+      TableField("wins_opp", _.opp.wins, true),
+      TableField("ballots_opp", _.opp.ballots, true),
+      TableField("points_opp", _.opp.points, true, Some(_.opp.points.dpl(2))),
+      TableField("sidepref_opp",  p => p.opp.side_pref(p.dt), true))
+
+  def updateRemote(pairings: Vector[Pairing], round: Int)(using remote: SpreadsheetHandle, config: Config): Unit =
+    val key = config.tableKeys.pairings
+    val sheetName = config.sheetNames.round_prefix + round.toString
+    if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
+    remote.writeRange(
+      s"$sheetName!A1", 
+      pairings.asSeqTable(key).select(key("division"), key("prop"), key("opp")))
+    

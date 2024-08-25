@@ -3,10 +3,10 @@
 ## Short term (1.0): Deliver functional, tested and clean CLI app
 
 * Refactor tables:
-  * pairings
   * panels
   * names
   * speakers
+  * results
 * Change Actions into a class called "TabController" or similar
 * Track pull-ups by round rather than as a total
 * Check for orphaned code from old functionality

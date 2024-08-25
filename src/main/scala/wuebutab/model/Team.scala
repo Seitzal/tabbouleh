@@ -77,7 +77,7 @@ object Team:
     val mixedBallots = mixedN * (if regularBallots >= regularN * (3d / 2) then 3 else 2)
     val naSwingNBallots = (regularBallots.toFloat / regularN).toInt
     val imputedBallots = mixedBallots + naSwingNBallots * naSwingN
-    val imputedPoints = (mixedN + naSwingN) * (regularPoints / regularN)
+    val imputedPoints = (mixedN + naSwingN) * (if regularN == 0 then 0d else regularPoints / regularN)
 
     val prepRounds = rounds.filter(_.debateType == DebateType.Prepared).map(_.roundNo)
     val imprRounds = rounds.filter(_.debateType == DebateType.Impromptu).map(_.roundNo)
@@ -109,9 +109,7 @@ object Team:
     for team <- (debateResults.map(_.winner) ++ debateResults.map(_.loser) ++ meta.keys).distinct
     yield Team(team, debateResults, rounds, meta) 
 
-extension(teams: Vector[Team])
-
-  def updateRemote()(using remote: SpreadsheetHandle, config: Config): Unit =
+  def updateRemote(teams: Vector[Team])(using remote: SpreadsheetHandle, config: Config): Unit =
     val sheet = config.sheetNames.teams
     if !remote.sheetExists(sheet) then remote.createSheet(sheet)
     remote.writeRange(s"$sheet!A1", 

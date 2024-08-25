@@ -3,7 +3,8 @@
     "ballots": "Formularantworten 1",
     "rounds": "Structure",
     "teams": "Teams",
-    "judges": "Judges"
+    "judges": "Judges",
+    "round_prefix": "Round "
   },
   "tableKeys": {
     "ballots": {
@@ -61,6 +62,21 @@
       "debate_type": "Debate Type",
       "weights": "Pairing",
       "weight_random": "Random"
+    },
+    "pairings": {
+      "division": "Division",
+      "mean_rank_score": "MRS",
+      "weight": "Weight",
+      "prop": "Proposition",
+      "wins_prop": "P:W",
+      "ballots_prop": "P:B",
+      "points_prop": "P:P",
+      "sidepref_prop": "P:SP",
+      "opp": "Opposition",
+      "wins_opp": "O:W",
+      "ballots_opp": "O:B",
+      "points_opp": "O:P",
+      "sidepref_opp": "O:SP" 
     }
   }
 }

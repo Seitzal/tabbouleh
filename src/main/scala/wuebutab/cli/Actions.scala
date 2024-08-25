@@ -11,7 +11,7 @@ import com.google.api.services.sheets.v4.model._
 
 object Actions:
 
-  given Config = Config.default
+  given config: Config = Config.default
 
   private def getRemote: SpreadsheetHandle = 
     SpreadsheetHandle(Source.fromFile("remote").mkString) match
@@ -56,7 +56,7 @@ object Actions:
       val meta = TeamMeta.fetchAll
       val results = Results(ballots, structure, meta)
       println(results.teams.renderTable(Config.default.tableKeys.teams))
-      results.teams.updateRemote()
+      Team.updateRemote(results.teams)
 
   def generatePairings(rounds: Option[List[Int]], update: Boolean): Unit =
     val remote = getRemote
@@ -81,17 +81,14 @@ object Actions:
                 round.roundNo)
                 .sortBy(p => (p.division, p.mean_rank_score)) 
               println(s"Pairings for round ${round.roundNo}:")
-              println(pairings.renderTable)
-              if update then 
-                val sheetName = s"Round ${round.roundNo}"
-                if !remote.sheetExists(sheetName) then remote.createSheet(sheetName)
-                remote.writeRange(sheetName, pairings.asSeqTable.select("Div", "Prop", "Opp"))
+              println(pairings.renderTable(config.tableKeys.pairings))
+              if update then Pairing.updateRemote(pairings, round.roundNo)
               iter(rounds_remaining.tail, teams.map(_.apply_pairings(pairings, round.roundNo)))
             case None => 
               println(s"Couldn't generate pairings for round ${rounds_remaining.head}: Not found in structure.")
               iter(rounds_remaining.tail, teams)
         else if update then
-          teams.updateRemote()
+          Team.updateRemote(teams)
       rounds match
         case Some(rs) => iter(rs, results.teams) 
         case None => iter(List(results.rounds_completed.max + 1), results.teams)

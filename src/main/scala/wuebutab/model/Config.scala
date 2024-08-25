@@ -7,14 +7,16 @@ case class ConfigSheetNames(
   ballots: String,
   rounds: String,
   teams: String,
-  judges: String
+  judges: String,
+  round_prefix: String
 ) derives ReadWriter
 
 case class ConfigTableKeys(
   ballots: TableKey,
   teams: TableKey,
   judges: TableKey,
-  rounds: TableKey
+  rounds: TableKey,
+  pairings: TableKey
 ) derives ReadWriter
 
 case class Config(
