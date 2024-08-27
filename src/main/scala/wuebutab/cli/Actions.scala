@@ -129,8 +129,8 @@ object Actions:
         val opp = results.teams.filter(_.name == row(2)).head
         Pairing(prop, opp, DebateType.Impromptu, 0d)
       val panels = make_panels(pairings, judges.filter(_.active), PanelWeights())
-      println(panels.renderTable)
-      if update then remote.writeRange(s"'Round $round'!E2", panels.map(_.toTableRow))
+      println(panels.renderTable(config.tableKeys.panels))
+      if update then Panel.updateRemote(panels, round)
 
   def test(): Unit =
     val remote = getRemote

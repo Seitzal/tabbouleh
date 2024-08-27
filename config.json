@@ -77,6 +77,15 @@
       "ballots_opp": "O:B",
       "points_opp": "O:P",
       "sidepref_opp": "O:SP" 
+    },
+    "panels": {
+      "division": "Division",
+      "mean_rank_score": "MRS",
+      "prop": "Proposition",
+      "opp": "Opposition",
+      "chair": "Chair",
+      "panelist1": "Panelist 1",
+      "panelist2": "Panelist 2"
     }
   }
 }

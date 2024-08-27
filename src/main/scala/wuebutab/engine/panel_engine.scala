@@ -49,7 +49,7 @@ def alloc_single(pairings: Seq[Pairing], panels: Seq[Seq[String]], judges: Seq[J
     .map(edge => (graph.getEdgeSource(edge), graph.getEdgeTarget(edge) - offset))
     .toMap
 
-def make_panels(pairings: Seq[Pairing], judges: Seq[Judge], weights: PanelWeights = PanelWeights()): Seq[Panel] =
+def make_panels(pairings: Seq[Pairing], judges: Seq[Judge], weights: PanelWeights = PanelWeights()): Vector[Panel] =
   val panels0 = pairings.map(_ => Vector())
   val chairs = alloc_single(pairings, panels0, judges, weights, true)
   val chairs_assigned = chairs.values.toSet
@@ -64,7 +64,7 @@ def make_panels(pairings: Seq[Pairing], judges: Seq[Judge], weights: PanelWeight
       then panels0(i) :+ judges(panelists1(i)).name else Vector()
   val judges2 = (0 until judges1.length).filterNot(panelists_assigned1.contains).map(judges1(_))
   val panelists2 = alloc_single(pairings, panels2, judges2, weights, false) 
-  for i <- 0 until pairings.length yield Panel(
+  for i <- (0 until pairings.length).toVector yield Panel(
     pairings(i), 
     judges(chairs(i)), 
     panelists1.get(i).map(judges1(_)), 

@@ -16,7 +16,8 @@ case class ConfigTableKeys(
   teams: TableKey,
   judges: TableKey,
   rounds: TableKey,
-  pairings: TableKey
+  pairings: TableKey,
+  panels: TableKey
 ) derives ReadWriter
 
 case class Config(

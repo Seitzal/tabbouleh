@@ -19,7 +19,11 @@ extension (header: TableHeader)
   def findLocalized(column: String, key: TableKey): Int =
     header.findIgnoreCase(key(column))
   def findLocalizedMulti(prefix: String, key: TableKey): Vector[Int] =
-    (for i <- 0 until header.length if header(i).startsWith(key(prefix)) yield i).toVector
+    val result = 
+      for i <- 0 until header.length 
+      if header(i).startsWith(key(prefix)) 
+      yield i
+    result.toVector
   def suffixes(prefix: String, key: TableKey): Vector[String] =
     header.filter(_.startsWith(key(prefix))).map(_.drop(key(prefix).length))
 
@@ -108,7 +112,8 @@ extension[T] (ts: java.util.List[java.util.List[T]])
     else ts.asScala.toVector.map(_.asScala.toVector.map(_.toString))
 
 extension[T] (ts: Seq[T])
-  def multiIndex(is: Seq[Int]): Seq[T] = for i <- is yield ts(i)
+  def multiIndex(is: Seq[Int]): Seq[T] = 
+    for i <- is if ts.length > i yield ts(i)
 
 extension(d: Double)
   def dpl(places: Int): String = s"%.${places}f".format(d)
