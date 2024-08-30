@@ -3,11 +3,13 @@
 ## Short term (1.0): Deliver functional, tested and clean CLI app
 
 * Refactor tables:
+  * speeches
   * names
   * speakers
   * results
 * Change Actions into a class called "TabController" or similar
 * Track pull-ups by round rather than as a total
+* Add panel gender balance as a weighted constraint in judge allocation
 * Check for orphaned code from old functionality
 * Test all functionality
 * Cross-check results with a manual shadow tab

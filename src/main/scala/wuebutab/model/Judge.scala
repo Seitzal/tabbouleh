@@ -29,22 +29,33 @@ case class Judge(
         .focus(_.teams_prev)
         .modify(_ :+ "" :+ "")
 
-  def updateForRound(round: SeqTable): Judge = 
+  def updateForRound(round: Vector[Vector[String]])(using config: Config): Judge = 
+    val header = TableHeader(round.head)
+    val key =  config.tableKeys.panels
     val found = for 
       row <- 0 until round.length
       col <- 0 until round(row).length
-      if round(row)(col) == this.name
+      if round.isDefinedAt(row) 
+      && round(row).isDefinedAt(col) 
+      && round(row)(col) == this.name
     yield (
-      if col == 4 then 1 else 0,
-      round(row).slice(1, 3).map(_.toString),
-      round(row).slice(4, 7).map(_.toString).filter(name => name != this.name && name != ""))
+      if col == header.findLocalized("chair", key) then 1 else 0,
+      round(row).multiIndex(Seq(
+        header.findLocalized("prop", key), 
+        header.findLocalized("opp", key)
+      )),
+      round(row).multiIndex(Seq(
+        header.findLocalized("chair", key), 
+        header.findLocalized("panelist1", key),
+        header.findLocalized("panelist2", key)
+      )).filter(name => name != this.name && name != ""))
     if !found.isEmpty then this
       .focus(_.times_chair).modify(_ + found.head._1)
       .focus(_.teams_prev).modify(_ ++ found.head._2)
       .focus(_.colleagues_prev).modify(_ ++ found.head._3)
     else this
 
-  def updateForRounds(rounds: Seq[SeqTable]): Judge =
+  def updateForRounds(rounds: Seq[Vector[Vector[String]]])(using config: Config): Judge =
     if rounds.isEmpty then this
     else this.updateForRound(rounds.head).updateForRounds(rounds.tail)
 
