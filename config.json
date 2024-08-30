@@ -4,7 +4,8 @@
     "rounds": "Structure",
     "teams": "Teams",
     "judges": "Judges",
-    "round_prefix": "Round "
+    "round_prefix": "Round ",
+    "speeches": "Speeches"
   },
   "tableKeys": {
     "ballots": {
@@ -86,6 +87,15 @@
       "chair": "Chair",
       "panelist1": "Panelist 1",
       "panelist2": "Panelist 2"
+    },
+    "speeches" : {
+      "team": "Team",
+      "home_team": "Home Team",
+      "name": "Name",
+      "harmonized_name": "Harmonized Name",
+      "round": "Round",
+      "type": "Type",
+      "score": "Score"
     }
   }
 }

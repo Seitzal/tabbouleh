@@ -134,16 +134,10 @@ object Actions:
 
   def test(): Unit =
     val remote = getRemote
-    val data = java.util.ArrayList[java.util.List[Object]]()
-    val data1 = java.util.ArrayList[Object]()
-    data1.add("String")
-    data1.add(java.lang.Integer(1))
-    data1.add(java.lang.Double(2.5))
-    data.add(data1)
-    val valueRange = ValueRange().setValues(data)
-    val request = remote.service.spreadsheets.values.update(remote.spreadsheetId, "Test!A1", valueRange).setValueInputOption("RAW")
-    request.execute()
-    val data_s = List(List("String", java.lang.Integer(1), java.lang.Double(2.5)))
-    val valueRange_s = ValueRange().setValues(data_s.map(_.asJava).asJava)
-    val request_s = remote.service.spreadsheets.values.update(remote.spreadsheetId, "Test!A2", valueRange_s).setValueInputOption("RAW")
-    request_s.execute()
+    val ballots = Ballot.fetchAll
+    val names = if remote.sheetExists("Names") then Names.fetch(remote, "Names") else Names.empty
+    val speeches_old = if remote.sheetExists(config.sheetNames.speeches) then Some(remote.readRange(config.sheetNames.speeches)) else None
+    val speeches = Speech.getAll(ballots, names, speeches_old)
+    if !remote.sheetExists(config.sheetNames.speeches) then remote.createSheet(config.sheetNames.speeches)
+    remote.writeRange(config.sheetNames.speeches, speeches.asSeqTable(config.tableKeys.speeches))
+    

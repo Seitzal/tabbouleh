@@ -8,7 +8,8 @@ case class ConfigSheetNames(
   rounds: String,
   teams: String,
   judges: String,
-  round_prefix: String
+  round_prefix: String,
+  speeches: String
 ) derives ReadWriter
 
 case class ConfigTableKeys(
@@ -17,7 +18,8 @@ case class ConfigTableKeys(
   judges: TableKey,
   rounds: TableKey,
   pairings: TableKey,
-  panels: TableKey
+  panels: TableKey,
+  speeches: TableKey
 ) derives ReadWriter
 
 case class Config(

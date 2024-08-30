@@ -18,15 +18,22 @@ case class Speech(
 
 object Speech:
 
-  def getHomeTeams(data: SeqTable): Map[(String, Int), String] =
+  def getHomeTeams(data: SeqTable, key: TableKey): Map[(String, Int), String] =
+    val header = TableHeader(data.head.toVector.map(_.toString))
     data
-      .filter(row => row(0).toString.startsWith("Swing") | row(0).toString.startsWith("Mixed"))
-      .filter(row => row(1) != "")
-      .map(row => (row(2).toString, row(4).parseInt) -> row(1).toString)
+      .filter(row => 
+        val teamName = row(header.findLocalized("team", key)).toString
+        teamName.startsWith("Swing") || teamName.startsWith("Mixed"))
+      .filter(row => row(header.findLocalized("home_team", key)) != "")
+      .map(row => 
+          val homeTeam = row(header.findLocalized("home_team", key)).toString
+          val name = row(header.findLocalized("name", key)).toString
+          val round = row(header.findLocalized("round", key)).parseInt
+          (name, round) -> homeTeam)
       .toMap
 
-  def getAll(ballots: Vector[Ballot], names: Names, old: Option[SeqTable]): Vector[Speech] =
-    val homeTeams = old.map(getHomeTeams).getOrElse(Map())
+  def getAll(ballots: Vector[Ballot], names: Names, old: Option[SeqTable])(using config: Config): Vector[Speech] =
+    val homeTeams = old.map(getHomeTeams(_, config.tableKeys.speeches)).getOrElse(Map())
     ballots.map(ballot =>
       val propSpeeches = for i <- (0 until 4).toVector yield Speech(
         ballot.prop,
@@ -56,11 +63,11 @@ object Speech:
   given t: Tabulatable[Speech] = new Tabulatable:
 
     def fields = Seq(
-      TableField("Team", _.team, false),
-      TableField("Home Team", _.homeTeam, false),
-      TableField("Name", _.name, false),
-      TableField("Harmonized Name", _.harmonizedName, false),
-      TableField("Round", _.round.toString, true),
-      TableField("Type", _.speechType, false),
-      TableField("Score", _.score.dpl(2), true),
+      TableField("team", _.team, false),
+      TableField("home_team", _.homeTeam, false),
+      TableField("name", _.name, false),
+      TableField("harmonized_name", _.harmonizedName, false),
+      TableField("round", _.round, true),
+      TableField("type", _.speechType, false),
+      TableField("score", _.score, true, Some(_.score.dpl(2))),
     )
