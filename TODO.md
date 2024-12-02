@@ -10,6 +10,9 @@
 * Change Actions into a class called "TabController" or similar
 * Track pull-ups by round rather than as a total
 * Add panel gender balance as a weighted constraint in judge allocation
+* Add clean error messages:
+  * unfindable/misnamed table fields
+  * Missing structure tab 
 * Check for orphaned code from old functionality
 * Test all functionality
 * Cross-check results with a manual shadow tab
