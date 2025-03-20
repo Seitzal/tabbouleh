@@ -65,7 +65,7 @@ object Judge:
     val key = config.tableKeys.judges
     Judge(
       row(header.findLocalized("name", key)),
-      row(header.findLocalized("active", key)).toBoolean,
+      row(header.findLocalized("active", key)) == "1",
       row(header.findLocalized("division", key)),
       row(header.findLocalized("rating", key)).toInt,
       0,

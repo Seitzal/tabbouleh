@@ -10,7 +10,7 @@ case class PanelWeights(
   base_panelist: Double = 90,
   penalty: Double = 100,
   rating_chair: Double = 1,
-  rotation_chair: Double = 1.5,
+  rotation_chair: Double = .75,
   rating_panelist: Double = 0,
   new_panel: Double = 1,
   bubble: Double = 0.1,

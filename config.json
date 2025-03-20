@@ -1,6 +1,6 @@
 {
   "sheetNames": {
-    "ballots": "Formularantworten 1",
+    "ballots": "Ballots",
     "rounds": "Structure",
     "teams": "Teams",
     "judges": "Judges",
@@ -14,7 +14,7 @@
       "judgeName": "Name of Judge",
       "judgeStatus": "Status of Judge",
       "prop": "Name of Proposition Team/School",
-      "opp": "Name of OppositionTeam/School",
+      "opp": "Name of Opposition Team/School",
       "propNames1": "Name of Proposition 1st speaker",
       "propNames2": "Name of Proposition 2nd speaker",
       "propNames3": "Name of Proposition 3rd speaker",
@@ -31,7 +31,7 @@
       "oppScores2": "Score of Opposition 2nd speaker",
       "oppScores3": "Score of Opposition 3rd speaker",
       "oppScores4": "Score of Opposition reply speaker (30-40)",
-      "winningTeam": "Winning Team/School",
+      "winningTeam": "Winning Team / School",
       "winningSide": "Winning Side (this MUST be the side with the higher total score)"
     },
     "teams": {
