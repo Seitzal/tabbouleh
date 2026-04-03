@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 val INITIAL_RATING = 1500
 val DIVISOR = 400

@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import monocle._
 import monocle.syntax.all._

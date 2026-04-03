@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import scala.util.{Try, Success, Failure}
 import scala.jdk.CollectionConverters._
@@ -85,7 +85,7 @@ object SpreadsheetHandle:
   def apply(id: String): Try[SpreadsheetHandle] =
     Try {
       new SpreadsheetHandle(
-        "Wuebutab", 
+        "tabbouleh", 
         "auth/credentials.json", 
         "auth/tokens", 
         id)

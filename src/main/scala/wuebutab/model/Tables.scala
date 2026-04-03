@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import scala.jdk.CollectionConverters._
 import upickle.default.ReadWriter
@@ -42,9 +42,9 @@ extension (c: SeqTableContent)
 
   def asJavaObject: Object = c match
     case s: String => s
-    case i: Int => Integer(i)
-    case d: Double => java.lang.Double(d)
-    case b: Boolean => java.lang.Boolean(b)
+    case i: Int => Integer.valueOf(i)
+    case d: Double => java.lang.Double.valueOf(d)
+    case b: Boolean => java.lang.Boolean.valueOf(b)
 
 //--- SeqTable ---
 

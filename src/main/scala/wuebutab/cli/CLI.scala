@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import org.rogach.scallop._
 import org.rogach.scallop.exceptions._
@@ -8,9 +8,9 @@ import scala.util.{Try, Success, Failure}
 
 class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
 
-  version("Wuebutab 0.1 DEV, (c) 2024 Alex Seitz / Debating Society Germany e.V.\n")
+  version("Tabbouleh 0.3 DEV, (c) 2024-2026 Alex Seitz / Debating Society Germany e.V.\n")
 
-  banner("Usage: wbt [remote|fetch|pair|alloc] [OPTION]...\n\nOptions:\n")
+  banner("Usage: tabbouleh [remote|fetch|pair|alloc] [OPTION]...\n\nOptions:\n")
 
   object remote extends Subcommand("remote", "r"):
 
@@ -67,12 +67,12 @@ class CLI (arguments: Seq[String]) extends ScallopConf(arguments):
       Actions.updateRankings()
 
     case Some(_: this.pair.type) =>
-      val rounds = this.pair.rounds.get
+      val rounds = this.pair.rounds.toOption
       val update = this.pair.update()
       Actions.generatePairings(rounds, update)
 
     case Some(_: this.speakers.type) =>
-      val minrounds = this.speakers.minrounds.get.getOrElse(1)
+      val minrounds = this.speakers.minrounds.toOption.getOrElse(1)
       Actions.generateSpeakerRanking(minrounds)
 
     case Some(_: this.alloc.type) =>

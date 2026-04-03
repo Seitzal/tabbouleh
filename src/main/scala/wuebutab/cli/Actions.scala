@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import java.io.{File, PrintWriter}
 import scala.io.Source

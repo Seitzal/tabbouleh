@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import org.jgrapht.graph._
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching

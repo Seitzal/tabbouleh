@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 case class Round(roundNo: Int, debateType: DebateType, pairing: Option[Weights])
 

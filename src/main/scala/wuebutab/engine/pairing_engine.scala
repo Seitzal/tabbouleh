@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import org.jgrapht.graph._
 import org.jgrapht.alg.matching.blossom.v5.KolmogorovWeightedPerfectMatching
@@ -39,7 +39,7 @@ case class Weights(
   def apply_points(t1: Team, t2: Team) =
     math.abs(t1.points - t2.points) * points
   def apply_random = 
-    Random.nextDouble * random
+    Random.nextDouble() * random
   def apply(t1: Team, t2: Team, dt: DebateType, sidelock: Boolean): Double =
     apply_rematch(t1, t2) +
     (if sidelock then 0 else apply_side_pref(t1, t2, dt)) +

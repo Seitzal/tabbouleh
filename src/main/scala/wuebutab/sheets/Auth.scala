@@ -1,4 +1,4 @@
-package wuebutab
+package de.schoolsdebate.tabbouleh
 
 import java.io.FileReader
 import scala.jdk.CollectionConverters._
