@@ -10,6 +10,9 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 
+import com.google.api.client.auth.oauth2.TokenResponseException
+import java.io.File
+
 class SpreadsheetHandle(
   val applicationName: String,
   val credentialsPath: String,
@@ -38,6 +41,8 @@ class SpreadsheetHandle(
     val request = service.spreadsheets.get(spreadsheetId)
     val response = request.execute()
     response.getProperties.getTitle
+  // To detect token expiration or other issues immediately, run getTitle on construction
+  getTitle
 
   def readRange(range: String): Vector[Vector[String]] =
     val request = service.spreadsheets.values.get(spreadsheetId, range)
@@ -84,4 +89,8 @@ object SpreadsheetHandle:
         "auth/credentials.json", 
         "auth/tokens", 
         id)
+    }.recoverWith{
+      case e: TokenResponseException =>
+        File("auth/tokens/StoredCredential").delete()
+        SpreadsheetHandle(id)
     }
