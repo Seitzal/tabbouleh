@@ -27,20 +27,20 @@ case class DebateResults(
     else 0d
 
   private def isRegularTeam(team: String) =
-    !team.startsWith("Mixed-Team") &&
-    team != "Swing-Team (NA)"
+    !team.startsWith("MIXED TEAM") &&
+    team != "SWING TEAM (NA)"
 
   def regularMatchFor(team: String) =
     (prop == team && isRegularTeam(opp)) ||
     (opp == team && isRegularTeam(prop))
 
   def mixedMatchFor(team: String) =
-    (prop == team && opp.startsWith("Mixed-Team")) ||
-    (opp == team && prop.startsWith("Mixed-Team"))
+    (prop == team && opp.startsWith("MIXED TEAM")) ||
+    (opp == team && prop.startsWith("MIXED TEAM"))
 
   def naSwingFor(team: String) =
-    (prop == team && opp == "Swing-Team (NA)") ||
-    (opp == team && prop == "Swing-Team (NA)")
+    (prop == team && opp == "SWING TEAM (NA)") ||
+    (opp == team && prop == "SWING TEAM (NA)")
 
 object DebateResults:
 

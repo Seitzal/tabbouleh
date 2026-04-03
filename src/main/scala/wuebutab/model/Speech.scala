@@ -23,7 +23,7 @@ object Speech:
     data
       .filter(row => 
         val teamName = row(header.findLocalized("team", key)).toString
-        teamName.startsWith("Swing") || teamName.startsWith("Mixed"))
+        teamName.toLowerCase.startsWith("swing") || teamName.toLowerCase.startsWith("mixed"))
       .filter(row => row(header.findLocalized("home_team", key)) != "")
       .map(row => 
           val homeTeam = row(header.findLocalized("home_team", key)).toString
@@ -37,7 +37,7 @@ object Speech:
     ballots.map(ballot =>
       val propSpeeches = for i <- (0 until 4).toVector yield Speech(
         ballot.prop,
-        if ballot.prop.startsWith("Swing") | ballot.prop.startsWith("Mixed") 
+        if ballot.prop.toLowerCase.startsWith("swing") | ballot.prop.toLowerCase.startsWith("mixed") 
           then homeTeams.getOrElse((ballot.propNames(i), ballot.round),"") 
           else ballot.prop,
         ballot.propNames(i),
@@ -48,7 +48,7 @@ object Speech:
       ).checkName(names)
       val oppSpeeches = for i <- (0 until 4).toVector yield Speech(
         ballot.opp,
-        if ballot.opp.startsWith("Swing") | ballot.opp.startsWith("Mixed") 
+        if ballot.opp.toLowerCase.startsWith("swing") | ballot.opp.toLowerCase.startsWith("mixed") 
           then homeTeams.getOrElse((ballot.oppNames(i), ballot.round),"") 
           else ballot.opp,
         ballot.oppNames(i),

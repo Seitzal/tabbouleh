@@ -89,13 +89,13 @@
       "panelist2": "Panelist 2"
     },
     "speeches" : {
-      "team": "Team",
-      "home_team": "Home Team",
-      "name": "Name",
-      "harmonized_name": "Harmonized Name",
-      "round": "Round",
-      "type": "Type",
-      "score": "Score"
+      "team": "team",
+      "home_team": "home_team",
+      "name": "name",
+      "harmonized_name": "harmonized_name",
+      "round": "round",
+      "type": "type",
+      "score": "score"
     }
   }
 }
